@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Signal,
   SlidersHorizontal,
+  Vote,
   X,
 } from "lucide-react";
 import {
