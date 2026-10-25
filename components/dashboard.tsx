@@ -28,7 +28,6 @@ import {
   ShieldCheck,
   Signal,
   SlidersHorizontal,
-  Vote,
   X,
 } from "lucide-react";
 import {
@@ -50,10 +49,10 @@ const PHOTO: Record<string, string> = {
 const LOGO: Record<string, string> = { "13": "/pt.png", "22": "/pl.png" };
 function color(c?: Candidate) {
   return c?.number === "13"
-    ? "#f36370"
+    ? "#db5361"
     : c?.number === "22"
-      ? "#6688ff"
-      : "#c9d9a5";
+      ? "#4274db"
+      : "#8c9aae";
 }
 function Photo({ candidate }: { candidate: Candidate }) {
   const [failed, setFailed] = useState(false);
@@ -288,9 +287,9 @@ export default function Dashboard() {
   const stateColor = (code: string) => {
     const r = stateResult(code);
     if (!r?.released || r.candidates[0]?.votes === r.candidates[1]?.votes)
-      return "#293139";
+      return "#dfe7f0";
     return tab === "progress"
-      ? `hsl(87 25% ${18 + (r.progress || 0) * 0.35}%)`
+      ? `hsl(213 75% ${94 - (r.progress || 0) * 0.48}%)`
       : color(r.candidates[0]);
   };
   const share = async () => {
@@ -363,7 +362,7 @@ export default function Dashboard() {
           </span>
           pulso<span className="brand-dot">.</span>
           <span className="brand-edition">
-            ELEIÇÕES
+            ELEIÇÕES GERAIS
             <br />
             2026
           </span>
@@ -403,26 +402,32 @@ export default function Dashboard() {
       </header>
       <main id="apuracao">
         <section className="page-intro">
-          <div>
+          <div className="intro-copy">
             <div className="eyebrow">
-              <span className="tiny-square" /> A DECISÃO DO BRASIL{" "}
-              <span className="eyebrow-line" /> 25 OUT 2026
+              <span className="tiny-square" /> ELEIÇÃO PRESIDENCIAL 2026
+              <span className="eyebrow-line" /> SEGUNDO TURNO
             </div>
             <h1>
-              Cada voto. <em>Um novo capítulo.</em>
+              O futuro tem <em>voz.</em>
             </h1>
-            <p>O segundo turno para presidente, em cada canto do país.</p>
+            <p>
+              Uma nova maneira de acompanhar a escolha de um país. Cada estado,
+              cada parcial, cada voto — com clareza e contexto.
+            </p>
+            <a className="hero-explore" href="#resultados">
+              Explorar resultados <ArrowDownToLine size={15} />
+            </a>
           </div>
-          <div className="intro-right">
-            <span className="round-badge">
-              <Vote size={19} />
-            </span>
-            <div>
-              <strong>Presidente da República</strong>
-              <span>
-                2º turno <i /> Eleição nacional
-              </span>
+          <div className="intro-visual" aria-label="Brasil, 27 unidades da federação">
+            <div className="intro-orbit orbit-outer" />
+            <div className="intro-orbit orbit-middle" />
+            <div className="intro-orbit orbit-inner" />
+            <div className="intro-visual-center">
+              <span>UMA NAÇÃO</span>
+              <strong>27</strong>
+              <small>UNIDADES DA FEDERAÇÃO</small>
             </div>
+            <span className="intro-visual-foot">BRASIL · 2026</span>
           </div>
         </section>
         {demo ? (
@@ -471,7 +476,7 @@ export default function Dashboard() {
             </button>
           </div>
         )}
-        <div className="workspace-toolbar">
+        <div id="resultados" className="workspace-toolbar">
           <div className="scope-tabs">
             <button className="selected" onClick={() => select("BR")}>
               <Globe2 size={15} /> Presidência <span>2º TURNO</span>
@@ -707,7 +712,7 @@ export default function Dashboard() {
                     height="6"
                     patternUnits="userSpaceOnUse"
                   >
-                    <circle cx="2" cy="2" r=".55" fill="#fff" opacity=".09" />
+                    <circle cx="2" cy="2" r=".55" fill="#fff" opacity=".13" />
                   </pattern>
                   <filter id="map-shadow">
                     <feDropShadow
@@ -715,7 +720,7 @@ export default function Dashboard() {
                       dy="12"
                       stdDeviation="15"
                       floodColor="#000"
-                      floodOpacity=".35"
+                      floodOpacity=".12"
                     />
                   </filter>
                 </defs>
@@ -758,6 +763,7 @@ export default function Dashboard() {
                         x={s.x}
                         y={s.y}
                         textAnchor="middle"
+                        style={{ fill: stateResult(s.uf)?.released ? "#fff" : "#50627c" }}
                         className={
                           [
                             "DF",
@@ -791,6 +797,7 @@ export default function Dashboard() {
                             x={s.x}
                             y={s.y + 13}
                             textAnchor="middle"
+                            style={{ fill: "#fff" }}
                           >
                             {Math.round(
                               tab === "progress"
