@@ -293,6 +293,8 @@ export default function Dashboard() {
       ? `hsl(213 75% ${94 - (r.progress || 0) * 0.48}%)`
       : color(r.candidates[0]);
   };
+  const stateHasVotes = (code: string) =>
+    stateResult(code)?.candidates.some((candidate) => (candidate.votes || 0) > 0) ?? false;
   const share = async () => {
     try {
       await navigator.clipboard.writeText(location.href);
@@ -764,7 +766,7 @@ export default function Dashboard() {
                         x={s.x}
                         y={s.y}
                         textAnchor="middle"
-                        style={{ fill: stateResult(s.uf)?.released ? "#fff" : "#50627c" }}
+                        style={{ fill: stateHasVotes(s.uf) && tab === "leader" ? "#fff" : "#50627c" }}
                         className={
                           [
                             "DF",
@@ -798,7 +800,7 @@ export default function Dashboard() {
                             x={s.x}
                             y={s.y + 13}
                             textAnchor="middle"
-                            style={{ fill: "#fff" }}
+                            style={{ fill: stateHasVotes(s.uf) && tab === "leader" ? "#fff" : "#50627c" }}
                           >
                             {Math.round(
                               tab === "progress"
