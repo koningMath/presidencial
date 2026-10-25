@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+artifacts
+.agents
+.codex
+.npmrc
+.env*
+tests
+scripts
+README.md
