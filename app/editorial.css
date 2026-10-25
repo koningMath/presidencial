@@ -30,7 +30,7 @@ main { padding:0 clamp(18px,3.4vw,60px); max-width:1680px; }
 .spotlight-portrait { position:absolute; inset:0; margin:0; width:100%; height:100%; min-height:0; overflow:hidden; }
 .spotlight-portrait img { width:100%; height:100%; object-fit:cover; object-position:62% 28%; filter:saturate(.93); mask-image:none; -webkit-mask-image:none; }
 .candidate-spotlight.left .spotlight-portrait img { object-position:49% center; }
-.candidate-spotlight.right .spotlight-portrait img { object-position:35% center; }
+.candidate-spotlight.right .spotlight-portrait img { object-position:39% center; }
 .spotlight-content { z-index:3; margin:auto 0 0; padding:25px 20px 25px; width:100%; }
 .spotlight-content h2 { min-height:0; font-size:clamp(20px,2vw,31px); letter-spacing:-.06em; text-transform:none; }
 .spotlight-percentage { margin-top:18px; font-size:clamp(48px,4.5vw,75px); }
