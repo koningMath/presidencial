@@ -42,11 +42,10 @@ import { integer, percent, cn } from "@/lib/utils";
 import states from "@/lib/brazil-map.json";
 import { InfoDialog } from "./dialog";
 import { MathematicalDecision } from "./mathematical";
-import { MunicipalityExplorer } from "./municipalities";
 import { AnimatedMetric } from "./animated-metric";
 const PHOTO: Record<string, string> = {
   "13": "/lula-new.webp",
-  "22": "/flavio.jpg",
+  "22": "/flavio-uol-2026.jpg",
 };
 const LOGO: Record<string, string> = { "13": "/pt.png", "22": "/pl.png" };
 const SELECTED_REFRESH_MS = 15000;
@@ -916,24 +915,6 @@ export default function Dashboard() {
                 </button>
               </div>
             </div>
-            <div className="map-shortcuts" aria-label="Atalhos para estados">
-              <span>IR DIRETO PARA</span>
-              {(["SP", "RJ", "MG", "BA", "RS"] as const).map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => select(code)}
-                  aria-pressed={uf === code}
-                  className={uf === code ? "is-active" : ""}
-                >
-                  {code} <ArrowUpRight size={12} />
-                </button>
-              ))}
-              <button type="button" className="all-states-shortcut" onClick={() => document.getElementById("estados")?.scrollIntoView({behavior:"smooth"})}>
-                27 UFs <ArrowUpRight size={12} />
-              </button>
-            </div>
-            <MunicipalityExplorer uf={uf} demo={demo}/>
           </div>
           <CandidateSpotlight candidate={candidates.find(c => c.number === "22") ?? placeholderCandidates[1]} side="right" demo={demo} available={available}/>
         </section>
