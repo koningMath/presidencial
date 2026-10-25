@@ -413,57 +413,27 @@ export default function Dashboard() {
         </div>
       </header>
       <main id="apuracao">
-        <section className="page-intro">
-          <div className="intro-copy">
-            <div className="eyebrow">
-              <span className="tiny-square" /> PULSO / ELEIÇÕES 2026
-              <span className="eyebrow-line" /> SEGUNDO TURNO
+        <section className="edition-heading" aria-labelledby="edition-title">
+          <div className="edition-identity">
+            <div className="edition-kicker">
+              <span className="edition-live-point" />
+              ELEIÇÕES BRASILEIRAS
+              <span className="edition-kicker-divider" />
+              2º TURNO · 2026
             </div>
-            <h1>
-              O Brasil decide.
-              <br />
-              <em>Você acompanha.</em>
+            <h1 id="edition-title">
+              Apuração <span>presidencial.</span>
             </h1>
-            <p>
-              A apuração presidencial com a informação no centro. Dados oficiais,
-              estado por estado, sem projeções e sem ruído.
-            </p>
-            <div className="hero-actions">
-              <a className="hero-explore" href="#resultados">
-                Explorar apuração <ArrowUpRight size={16} />
-              </a>
-              <span>Uma leitura independente dos dados do TSE.</span>
-            </div>
           </div>
-          <div
-            className="intro-visual"
-            aria-hidden="true"
-            onPointerMove={(event) => {
-              if (reduced || event.pointerType === "touch") return;
-              const rect = event.currentTarget.getBoundingClientRect();
-              const x = (event.clientX - rect.left) / rect.width - 0.5;
-              const y = (event.clientY - rect.top) / rect.height - 0.5;
-              event.currentTarget.style.setProperty("--tilt-x", `${(-y * 7).toFixed(2)}deg`);
-              event.currentTarget.style.setProperty("--tilt-y", `${(x * 9).toFixed(2)}deg`);
-              event.currentTarget.style.setProperty("--glint-x", `${((x + 0.5) * 100).toFixed(1)}%`);
-              event.currentTarget.style.setProperty("--glint-y", `${((y + 0.5) * 100).toFixed(1)}%`);
-            }}
-            onPointerLeave={(event) => {
-              event.currentTarget.style.removeProperty("--tilt-x");
-              event.currentTarget.style.removeProperty("--tilt-y");
-            }}
-          >
-            <span className="intro-visual-glint" />
-            <span className="intro-visual-kicker">PRESIDÊNCIA DA REPÚBLICA</span>
-            <strong className="intro-year">
-              20
-              <br />
-              26<span>.</span>
-            </strong>
-            <div className="intro-visual-foot">
-              <span>BRASIL</span>
-              <span>27 UFs <ArrowUpRight size={16} /></span>
-            </div>
+          <div className="edition-context">
+            <span className="edition-context-label">DADOS PÚBLICOS / BRASIL</span>
+            <p>
+              Uma leitura clara dos resultados oficiais.
+              Do país inteiro até cada estado.
+            </p>
+            <a href="#resultados">
+              Explorar resultados <ArrowUpRight size={15} />
+            </a>
           </div>
         </section>
         {demo ? (
