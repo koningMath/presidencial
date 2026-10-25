@@ -288,9 +288,9 @@ export default function Dashboard() {
   const stateColor = (code: string) => {
     const r = stateResult(code);
     if (!r?.released || r.candidates[0]?.votes === r.candidates[1]?.votes)
-      return "#dfe7f0";
+      return "#292b30";
     return tab === "progress"
-      ? `hsl(213 75% ${94 - (r.progress || 0) * 0.48}%)`
+      ? `hsl(211 42% ${23 + (r.progress || 0) * 0.24}%)`
       : color(r.candidates[0]);
   };
   const stateHasVotes = (code: string) =>
@@ -407,30 +407,36 @@ export default function Dashboard() {
         <section className="page-intro">
           <div className="intro-copy">
             <div className="eyebrow">
-              <span className="tiny-square" /> ELEIÇÃO PRESIDENCIAL 2026
+              <span className="tiny-square" /> PULSO / ELEIÇÕES 2026
               <span className="eyebrow-line" /> SEGUNDO TURNO
             </div>
             <h1>
-              O futuro tem <em>voz.</em>
+              O Brasil decide.
+              <br />
+              <em>Você acompanha.</em>
             </h1>
             <p>
-              Uma nova maneira de acompanhar a escolha de um país. Cada estado,
-              cada parcial, cada voto — com clareza e contexto.
+              A apuração presidencial com a informação no centro. Dados oficiais,
+              estado por estado, sem projeções e sem ruído.
             </p>
-            <a className="hero-explore" href="#resultados">
-              Explorar resultados <ArrowDownToLine size={15} />
-            </a>
-          </div>
-          <div className="intro-visual" aria-label="Brasil, 27 unidades da federação">
-            <div className="intro-orbit orbit-outer" />
-            <div className="intro-orbit orbit-middle" />
-            <div className="intro-orbit orbit-inner" />
-            <div className="intro-visual-center">
-              <span>UMA NAÇÃO</span>
-              <strong>27</strong>
-              <small>UNIDADES DA FEDERAÇÃO</small>
+            <div className="hero-actions">
+              <a className="hero-explore" href="#resultados">
+                Explorar apuração <ArrowUpRight size={16} />
+              </a>
+              <span>Uma leitura independente dos dados do TSE.</span>
             </div>
-            <span className="intro-visual-foot">BRASIL · 2026</span>
+          </div>
+          <div className="intro-visual" aria-hidden="true">
+            <span className="intro-visual-kicker">PRESIDÊNCIA DA REPÚBLICA</span>
+            <strong className="intro-year">
+              20
+              <br />
+              26<span>.</span>
+            </strong>
+            <div className="intro-visual-foot">
+              <span>BRASIL</span>
+              <span>27 UFs <ArrowUpRight size={16} /></span>
+            </div>
           </div>
         </section>
         {demo ? (
@@ -766,7 +772,7 @@ export default function Dashboard() {
                         x={s.x}
                         y={s.y}
                         textAnchor="middle"
-                        style={{ fill: stateHasVotes(s.uf) && tab === "leader" ? "#fff" : "#50627c" }}
+                        style={{ fill: stateHasVotes(s.uf) && tab === "leader" ? "#fff" : "#bec3cd" }}
                         className={
                           [
                             "DF",
@@ -800,7 +806,7 @@ export default function Dashboard() {
                             x={s.x}
                             y={s.y + 13}
                             textAnchor="middle"
-                            style={{ fill: stateHasVotes(s.uf) && tab === "leader" ? "#fff" : "#50627c" }}
+                            style={{ fill: stateHasVotes(s.uf) && tab === "leader" ? "#fff" : "#bec3cd" }}
                           >
                             {Math.round(
                               tab === "progress"

@@ -3,7 +3,7 @@ import "@fontsource-variable/manrope";
 import "@fontsource-variable/dm-sans";
 import "@fontsource/instrument-serif/latin-400.css";
 import "./globals.css";
-import "./light-theme.css";
+import "./apple-dark.css";
 export const metadata: Metadata = {
   title: "Pulso • Apuração presidencial 2026",
   description:
