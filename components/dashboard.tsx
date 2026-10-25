@@ -43,6 +43,8 @@ import {
 import { integer, percent, cn } from "@/lib/utils";
 import states from "@/lib/brazil-map.json";
 import { InfoDialog } from "./dialog";
+import { AnalysisLab } from "./insights";
+import { AudioBulletins } from "./radio";
 const Ambient = dynamic(() => import("./ambient"), { ssr: false });
 const PHOTO: Record<string, string> = {
   "13": "/lula.jpg",
@@ -96,6 +98,35 @@ function PartyLogo({ candidate }: { candidate: Candidate }) {
     />
   ) : null;
 }
+function CandidateSpotlight({ candidate, side, demo, available }: {
+  candidate: Candidate;
+  side: "left" | "right";
+  demo: boolean;
+  available: boolean;
+}) {
+  return (
+    <article
+      className={cn("candidate-spotlight", side)}
+      style={{ "--candidate-color": color(candidate) } as React.CSSProperties}
+      aria-label={`Candidato ${candidate.name}`}
+    >
+      <div className="spotlight-top">
+        <span className="spotlight-party"><span className="spotlight-dot"/>{candidate.party} / {candidate.number}</span>
+        <span className="spotlight-ranking">PRESIDÊNCIA · 2026</span>
+      </div>
+      <div className="spotlight-portrait" aria-hidden="true">
+        {PHOTO[candidate.number] && <img src={PHOTO[candidate.number]} alt="" />}
+      </div>
+      <div className="spotlight-content">
+        <span className="spotlight-label">{demo ? "CENÁRIO FICTÍCIO" : available ? "PARCIAL OFICIAL" : "AGUARDANDO DADOS"}</span>
+        <h2>{candidate.name}</h2>
+        <div className="spotlight-percentage">{percent(candidate.percent)}<small>%</small></div>
+        <div className="spotlight-track"><span style={{ width: `${candidate.percent ?? 0}%` }} /></div>
+        <div className="spotlight-votes"><span>VOTOS VÁLIDOS</span><strong>{integer(candidate.votes)}</strong></div>
+      </div>
+    </article>
+  );
+}
 export default function Dashboard() {
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -119,6 +150,7 @@ export default function Dashboard() {
   const [seconds, setSeconds] = useState(45);
   const [webgl, setWebgl] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [view, setView] = useState<"map" | "analysis" | "history" | "states" | "radio">("map");
   const [relief, setRelief] = useState(false);
   const last = useRef<Record<string, number>>({});
   const inFlight = useRef(new Set<string>());
@@ -257,6 +289,7 @@ export default function Dashboard() {
   }, [toast]);
   const select = (next: string) => {
     setUf(next);
+    setView("map");
     const u = new URL(location.href);
     next === "BR"
       ? u.searchParams.delete("uf")
@@ -380,10 +413,8 @@ export default function Dashboard() {
           </span>
         </a>
         <nav aria-label="Navegação principal">
-          <a href="#apuracao" className="nav-active">
-            Apuração <span>AO VIVO</span>
-          </a>
-          <a href="#estados">Por estado</a>
+          <button onClick={() => setView("map")} className={view === "map" ? "nav-active" : ""}>Apuração <span>AO VIVO</span></button>
+          <button onClick={() => setView("states")}>Por estado</button>
           <button onClick={() => setInfo(true)}>
             Entenda os dados <ArrowUpRight size={13} />
           </button>
@@ -413,6 +444,21 @@ export default function Dashboard() {
         </div>
       </header>
       <main id="apuracao">
+        <nav className="experience-dock" aria-label="Explorar seções do Pulso">
+          {([
+            ["map", "Visão geral"],
+            ["analysis", "Modelos"],
+            ["history", "Histórico"],
+            ["states", "27 estados"],
+            ["radio", "Rádio Pulso"],
+          ] as const).map(([id, label], i) => (
+            <button type="button" key={id} className={view === id ? "is-active" : ""} onClick={() => setView(id)} aria-current={view === id ? "page" : undefined}>
+              <span className="dock-index">0{i + 1}</span>{label}
+              {view === id && <span className="dock-active-dot" />}
+            </button>
+          ))}
+        </nav>
+        <div className={cn("experience-view", view !== "map" && "is-hidden")}>
         <section className="edition-heading" aria-labelledby="edition-title">
           <div className="edition-identity">
             <div className="edition-kicker">
@@ -510,6 +556,7 @@ export default function Dashboard() {
           </div>
         </div>
         <section className={cn("dashboard-grid", expanded && "map-expanded")}>
+          <CandidateSpotlight candidate={candidates.find(c => c.number === "13") ?? placeholderCandidates[0]} side="left" demo={demo} available={available}/>
           <aside className="results-sidebar">
             <div className="results-panel">
               <div className="panel-heading">
@@ -937,13 +984,18 @@ export default function Dashboard() {
                   {code} <ArrowUpRight size={12} />
                 </button>
               ))}
-              <button type="button" className="all-states-shortcut" onClick={() => document.getElementById("estados")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" })}>
+              <button type="button" className="all-states-shortcut" onClick={() => setView("states")}>
                 27 UFs <ArrowUpRight size={12} />
               </button>
             </div>
           </div>
+          <CandidateSpotlight candidate={candidates.find(c => c.number === "22") ?? placeholderCandidates[1]} side="right" demo={demo} available={available}/>
         </section>
-        <section className="details-section">
+        </div>
+        <section className={cn("experience-view", view !== "analysis" && "is-hidden")} aria-label="Modelos e simulações">
+          <AnalysisLab result={result} demo={demo}/>
+        </section>
+        <section className={cn("experience-view", view !== "history" && "is-hidden", "details-section")}>
           <div className="history-panel reveal">
             <div className="section-heading">
               <div>
@@ -1078,7 +1130,7 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
-        <section id="estados" className="states-section reveal">
+        <section id="estados" className={cn("experience-view", view !== "states" && "is-hidden", "states-section")}>
           <div className="states-header">
             <div>
               <span className="eyebrow">DO LOCAL AO NACIONAL</span>
@@ -1240,7 +1292,10 @@ export default function Dashboard() {
             </button>
           </div>
         </section>
-        <section className="closing-card">
+        <section className={cn("experience-view", view !== "radio" && "is-hidden")} aria-label="Rádio Pulso">
+          <AudioBulletins result={result} demo={demo} territory={locationName}/>
+        </section>
+        <section className={cn("closing-card", view !== "map" && "is-hidden")}>
           {webgl && !reduced && <Ambient />}
           <div>
             <span className="eyebrow">INFORMAÇÃO QUE APROXIMA</span>

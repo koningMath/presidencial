@@ -4,6 +4,7 @@ import "@fontsource-variable/dm-sans";
 import "@fontsource/instrument-serif/latin-400.css";
 import "./globals.css";
 import "./apple-dark.css";
+import "./experience.css";
 export const metadata: Metadata = {
   title: "Pulso • Apuração presidencial 2026",
   description:
