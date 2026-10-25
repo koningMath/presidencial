@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -43,11 +42,10 @@ import {
 import { integer, percent, cn } from "@/lib/utils";
 import states from "@/lib/brazil-map.json";
 import { InfoDialog } from "./dialog";
-import { AnalysisLab } from "./insights";
-import { AudioBulletins } from "./radio";
-const Ambient = dynamic(() => import("./ambient"), { ssr: false });
+import { MathematicalDecision } from "./mathematical";
+import { MunicipalityExplorer } from "./municipalities";
 const PHOTO: Record<string, string> = {
-  "13": "/lula.jpg",
+  "13": "/lula-new.webp",
   "22": "/flavio.jpg",
 };
 const LOGO: Record<string, string> = { "13": "/pt.png", "22": "/pl.png" };
@@ -148,9 +146,7 @@ export default function Dashboard() {
   const [hover, setHover] = useState<string | null>(null);
   const [toast, setToast] = useState("");
   const [seconds, setSeconds] = useState(45);
-  const [webgl, setWebgl] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [view, setView] = useState<"map" | "analysis" | "history" | "states" | "radio">("map");
   const [relief, setRelief] = useState(false);
   const last = useRef<Record<string, number>>({});
   const inFlight = useRef(new Set<string>());
@@ -166,10 +162,6 @@ export default function Dashboard() {
         states.some((s) => s.uf === initial))
     )
       setUf(initial);
-    try {
-      const c = document.createElement("canvas");
-      setWebgl(!!c.getContext("webgl2"));
-    } catch {}
   }, []);
   useEffect(() => {
     if (reduced) return;
@@ -289,7 +281,6 @@ export default function Dashboard() {
   }, [toast]);
   const select = (next: string) => {
     setUf(next);
-    setView("map");
     const u = new URL(location.href);
     next === "BR"
       ? u.searchParams.delete("uf")
@@ -413,8 +404,9 @@ export default function Dashboard() {
           </span>
         </a>
         <nav aria-label="Navegação principal">
-          <button onClick={() => setView("map")} className={view === "map" ? "nav-active" : ""}>Apuração <span>AO VIVO</span></button>
-          <button onClick={() => setView("states")}>Por estado</button>
+          <a href="#apuracao" className="nav-active">Apuração <span>AO VIVO</span></a>
+          <a href="#matematica">Matemática</a>
+          <a href="#estados">Por estado</a>
           <button onClick={() => setInfo(true)}>
             Entenda os dados <ArrowUpRight size={13} />
           </button>
@@ -444,21 +436,7 @@ export default function Dashboard() {
         </div>
       </header>
       <main id="apuracao">
-        <nav className="experience-dock" aria-label="Explorar seções do Pulso">
-          {([
-            ["map", "Visão geral"],
-            ["analysis", "Modelos"],
-            ["history", "Histórico"],
-            ["states", "27 estados"],
-            ["radio", "Rádio Pulso"],
-          ] as const).map(([id, label], i) => (
-            <button type="button" key={id} className={view === id ? "is-active" : ""} onClick={() => setView(id)} aria-current={view === id ? "page" : undefined}>
-              <span className="dock-index">0{i + 1}</span>{label}
-              {view === id && <span className="dock-active-dot" />}
-            </button>
-          ))}
-        </nav>
-        <div className={cn("experience-view", view !== "map" && "is-hidden")}>
+        <div className="experience-view">
         <section className="edition-heading" aria-labelledby="edition-title">
           <div className="edition-identity">
             <div className="edition-kicker">
@@ -984,18 +962,17 @@ export default function Dashboard() {
                   {code} <ArrowUpRight size={12} />
                 </button>
               ))}
-              <button type="button" className="all-states-shortcut" onClick={() => setView("states")}>
+              <button type="button" className="all-states-shortcut" onClick={() => document.getElementById("estados")?.scrollIntoView({behavior:"smooth"})}>
                 27 UFs <ArrowUpRight size={12} />
               </button>
             </div>
+            <MunicipalityExplorer uf={uf} demo={demo}/>
           </div>
           <CandidateSpotlight candidate={candidates.find(c => c.number === "22") ?? placeholderCandidates[1]} side="right" demo={demo} available={available}/>
         </section>
         </div>
-        <section className={cn("experience-view", view !== "analysis" && "is-hidden")} aria-label="Modelos e simulações">
-          <AnalysisLab result={result} demo={demo}/>
-        </section>
-        <section className={cn("experience-view", view !== "history" && "is-hidden", "details-section")}>
+        <MathematicalDecision result={result} demo={demo}/>
+        <section className="details-section" id="historico">
           <div className="history-panel reveal">
             <div className="section-heading">
               <div>
@@ -1130,7 +1107,7 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
-        <section id="estados" className={cn("experience-view", view !== "states" && "is-hidden", "states-section")}>
+        <section id="estados" className="states-section">
           <div className="states-header">
             <div>
               <span className="eyebrow">DO LOCAL AO NACIONAL</span>
@@ -1292,11 +1269,7 @@ export default function Dashboard() {
             </button>
           </div>
         </section>
-        <section className={cn("experience-view", view !== "radio" && "is-hidden")} aria-label="Rádio Pulso">
-          <AudioBulletins result={result} demo={demo} territory={locationName}/>
-        </section>
-        <section className={cn("closing-card", view !== "map" && "is-hidden")}>
-          {webgl && !reduced && <Ambient />}
+        <section className="closing-card">
           <div>
             <span className="eyebrow">INFORMAÇÃO QUE APROXIMA</span>
             <h2>

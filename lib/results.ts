@@ -41,6 +41,7 @@ export type Candidate = {
 };
 export type Result = {
   uf: string;
+  city?: string;
   election: string;
   updatedAt: string;
   fetchedAt: string;
@@ -64,10 +65,16 @@ export type ApiResponse = {
   checkedAt: string;
 };
 export const election = process.env.TSE_ELECTION_ID || "6258";
-export function resultUrl(uf: string, id = election) {
+export function resultUrl(uf: string, id = election, city?: string) {
   if (!UFS.includes(uf as (typeof UFS)[number]) || !/^\d{1,6}$/.test(id))
     throw new Error("Parâmetro inválido");
-  return `https://resultados.tse.jus.br/oficial/ele2026/${id}/dados/${uf.toLowerCase()}/${uf.toLowerCase()}-c0001-e${id.padStart(6, "0")}-u.json`;
+  if (city && (!/^\d{5}$/.test(city) || uf === "BR" || uf === "ZZ"))
+    throw new Error("Código municipal inválido");
+  return `https://resultados.tse.jus.br/oficial/ele2026/${id}/dados/${uf.toLowerCase()}/${uf.toLowerCase()}${city || ""}-c0001-e${id.padStart(6, "0")}-u.json`;
+}
+export function municipalitiesUrl(id = election) {
+  if (!/^\d{1,6}$/.test(id)) throw new Error("Eleição inválida");
+  return `https://resultados.tse.jus.br/oficial/ele2026/${id}/config/mun-e${id.padStart(6, "0")}-cm.json`;
 }
 type Obj = Record<string, unknown>;
 function obj(v: unknown): Obj {
@@ -91,14 +98,14 @@ function pct(v: unknown) {
   if (n !== null && n > 100) throw new Error("Percentual inválido");
   return n;
 }
-export function normalizeEA20(raw: unknown, uf: string, id = election): Result {
+export function normalizeEA20(raw: unknown, uf: string, id = election, city?: string): Result {
   const r = obj(raw);
   if (
     String(r.ele) !== id ||
     String(r.t) !== "2" ||
     r.f !== "o" ||
-    String(r.cdabr).toUpperCase() !== uf ||
-    r.tpabr !== (uf === "BR" ? "br" : "uf")
+    String(r.cdabr).toUpperCase() !== (city || uf) ||
+    r.tpabr !== (city ? "mu" : uf === "BR" ? "br" : "uf")
   )
     throw new Error("Eleição, fase, turno ou abrangência incompatível");
   if (!["s", "n"].includes(String(r.dv)))
@@ -145,6 +152,7 @@ export function normalizeEA20(raw: unknown, uf: string, id = election): Result {
     throw new Error("Data da fonte inválida");
   return {
     uf,
+    ...(city ? { city } : {}),
     election: id,
     updatedAt: `${r.dg} ${r.hg}`,
     fetchedAt: new Date().toISOString(),
@@ -159,7 +167,7 @@ export function normalizeEA20(raw: unknown, uf: string, id = election): Result {
     turnout: released ? number(e.c) : null,
     abstention: released ? pct(e.pa) : null,
     candidates,
-    source: resultUrl(uf, id),
+    source: resultUrl(uf, id, city),
   };
 }
 export function demoResult(uf = "BR"): Result {
