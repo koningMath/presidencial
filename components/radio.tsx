@@ -15,7 +15,7 @@ function bulletin(result: Result | null | undefined, demo: boolean, territory: s
   const lead = first?.votes != null && second?.votes != null && first.votes !== second.votes
     ? `${first.name} aparece à frente de ${second.name} nesta parcial.`
     : "As candidaturas estão empatadas nesta parcial.";
-  return mode + `Boletim Pulso. Em ${territory}, ${percent(result.progress)} por cento das seções foram totalizadas. ${lead} Os números podem mudar. Fonte: Tribunal Superior Eleitoral.`;
+  return mode + `Boletim Pulso. Em ${territory}, ${percent(result.progress)} por cento das seções foram totalizadas. ${lead} Os números podem mudar. ${demo ? "Este cenário é inteiramente fictício." : "Fonte: Tribunal Superior Eleitoral."}`;
 }
 
 export function AudioBulletins({result,demo,territory}:Props) {
