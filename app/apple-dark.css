@@ -54,6 +54,19 @@ main { max-width: 1512px; padding: 0 55px; }
 .intro-visual-foot { display: flex; justify-content: space-between; gap: 20px; color: #878790; font-size: 10px; font-weight: 650; letter-spacing: .12em; }
 .intro-visual-foot span:last-child { display: inline-flex; align-items: center; gap: 8px; }
 
+/* Motion is restrained and spatial, never a replacement for information. */
+.reading-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: #a6d8ff; transform-origin: 0 50%; z-index: 100; pointer-events: none; box-shadow: 0 0 13px #2997ff80; }
+.intro-visual { transform-style: preserve-3d; transform: perspective(1100px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)); transition: transform .33s cubic-bezier(.2,.8,.2,1); will-change: transform; }
+.intro-visual:before { content: ""; position: absolute; inset: 0 0 0 17px; border: 1px solid #24262c; background: linear-gradient(142deg, #16181b2e 10%, #171b1f11 45%, #080a0d10 100%); border-radius: 24px; transform: translateZ(-24px); pointer-events: none; }
+.intro-visual-glint { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 35% 32% at var(--glint-x,64%) var(--glint-y,40%), #74baff16, transparent 100%); opacity: .7; transform: translateZ(5px); }
+.intro-year { transform: translateZ(55px); text-shadow: 3px 18px 28px #0008; }
+.intro-visual-kicker, .intro-visual-foot { transform: translateZ(24px); }
+.hero-explore { position: relative; overflow: hidden; }
+.hero-explore:after { content: ""; position: absolute; top: -50%; left: -80%; width: 45%; height: 200%; transform: skewX(-25deg); background: linear-gradient(90deg,transparent,#fff9,transparent); opacity: .3; transition: left .55s ease; pointer-events: none; }
+.hero-explore:hover:after { left: 130%; }
+.site-header nav a, .site-header nav button { transition: color .18s ease; }
+.site-header nav a:hover, .site-header nav button:hover { color: #f5f5f7; }
+
 /* Status and navigation. */
 .status-banner { border: 1px solid #29292e; background: #111113; color: #898991; border-radius: 13px; padding: 18px 22px; }
 .status-banner strong { color: #ededf1; }
@@ -114,6 +127,10 @@ main { max-width: 1512px; padding: 0 55px; }
 /* Quiet monochromatic cartography. Colors are reserved for factual votes. */
 .map-panel { position: relative; background: radial-gradient(ellipse 80% 64% at 60% 55%, #17191d 0%, #101113 70%, #101012 100%); min-width: 0; }
 .map-topbar { padding: 22px 25px; border-bottom: 1px solid #29292e; }
+.map-view-controls { display: flex; align-items: center; gap: 10px; }
+.relief-toggle { display: inline-flex; align-items: center; gap: 7px; padding: 10px 12px; min-height: 36px; border-radius: 100px; border: 1px solid #393941; color: #96969f; font-size: 10px; font-weight: 650; transition: background .2s, color .2s, border-color .2s; }
+.relief-toggle:hover, .relief-toggle.is-active { background: #1d3249; color: #b4dfff; border-color: #315d85; }
+.relief-toggle.is-active svg { filter: drop-shadow(0 0 6px #2997ff88); }
 .segmented { background: #202024; border: 1px solid #323238; padding: 4px; border-radius: 100px; }
 .segmented button { color: #9a9aa4; font-size: 11px; font-weight: 600; padding: 9px 16px; border-radius: 100px; }
 .segmented button.active { color: #f5f5f7; background: #39393f; box-shadow: 0 2px 10px #0005; }
@@ -127,6 +144,8 @@ main { max-width: 1512px; padding: 0 55px; }
 .back-brazil { color: #65b1ff; }
 .map-container { min-height: 623px; padding: 18px 24px 20px 87px; }
 .brazil-map { min-height: 555px; filter: drop-shadow(0 14px 24px #0005); }
+.brazil-map { transition: transform .75s cubic-bezier(.16,1,.3,1), filter .75s ease; transform-origin: 50% 50%; }
+.brazil-map.is-relief { transform: perspective(1100px) rotateX(16deg) rotateZ(-2deg) scale(.93); filter: drop-shadow(17px 31px 17px #000c) drop-shadow(0 0 25px #2d52661c); }
 .map-state path { stroke: #141619; stroke-width: 1.9px; }
 .map-state:hover path:first-child, .map-state:focus-visible path:first-child { stroke: #b4c9de; stroke-width: 2.6px; }
 .map-state.is-selected path:first-child { stroke: #edf2f9; stroke-width: 2.9px; }
@@ -143,6 +162,21 @@ main { max-width: 1512px; padding: 0 55px; }
 .map-tooltip span { color: #b1b1bb; }
 .map-bottom { background: #141416; border-top: 1px solid #28282d; color: #85858e; padding: 15px 24px; }
 .map-bottom strong { color: #d1d1d8; }
+.map-shortcuts { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; padding: 13px 22px 16px; background: #141416; border-top: 1px solid #28282d; }
+.map-shortcuts > span { color: #686870; font-size: 9px; font-weight: 650; letter-spacing: .14em; margin-right: 9px; }
+.map-shortcuts button { display: inline-flex; gap: 8px; align-items: center; justify-content: center; border: 1px solid #34343b; background: #1c1c20; border-radius: 100px; color: #b6b6bf; padding: 8px 10px 8px 13px; font-size: 10px; font-weight: 650; min-height: 34px; transition: border-color .2s, transform .2s, background .2s, color .2s; }
+.map-shortcuts button svg { opacity: 0; transform: translate(-2px,2px); transition: transform .2s, opacity .2s; }
+.map-shortcuts button:hover, .map-shortcuts button:focus-visible, .map-shortcuts button.is-active { color: #f5f5f7; background: #2b2e35; border-color: #656b76; transform: translateY(-1px); }
+.map-shortcuts button:hover svg, .map-shortcuts button:focus-visible svg, .map-shortcuts button.is-active svg { opacity: 1; transform: translate(0,0); }
+.map-shortcuts .all-states-shortcut { margin-left: auto; color: #8fc8ff; background: #12202e; border-color: #203b57; }
+.map-shortcuts .all-states-shortcut svg { opacity: 1; transform: none; }
+.map-state path:first-child { transition: fill .35s ease, stroke .2s, filter .2s; }
+.map-state:hover path:first-child, .map-state:focus-visible path:first-child { filter: brightness(1.35); }
+.map-controls button:hover { background: #34343b; border-radius: 8px; }
+.candidate-card .candidate-track > div { box-shadow: 0 0 12px color-mix(in srgb, var(--candidate-color), transparent 72%); }
+.states-section { scroll-margin-top: 30px; }
+.state-table tbody tr { transition: background .22s ease; }
+.state-table tbody tr:hover .uf-icon { border-color: #6c8eb2; background: #243447; }
 
 /* Remaining data modules deliberately use fewer visual effects. */
 .details-section { gap: 17px; margin-top: 17px; }
@@ -237,10 +271,14 @@ footer p span, .footer-year, footer > div { color: #676770; }
   .hero-actions { gap: 15px; }
   .hero-actions > span { flex-basis: 100%; }
   .intro-visual { display: none; }
+  .reading-progress { height: 2px; }
   .status-banner { padding: 17px; border-radius: 12px; }
   .dashboard-grid { gap: 15px; }
   .results-panel, .map-panel, .history-panel, .participation-panel { border-radius: 15px; }
   .map-topbar { padding: 15px; gap: 12px; }
+  .map-view-controls { gap: 6px; }
+  .relief-toggle { padding: 8px 10px; min-height: 33px; }
+  .relief-toggle span { display: none; }
   .segmented button { padding: 8px 12px; }
   .map-caption { top: 83px; left: 21px; }
   .map-caption h3 { font-size: 29px; max-width: 205px; }
@@ -249,6 +287,10 @@ footer p span, .footer-year, footer > div { color: #676770; }
   .brazil-map { min-height: 355px; }
   .map-controls { left: 13px; bottom: 60px; }
   .map-note { left: 18px; bottom: 18px; }
+  .map-shortcuts { padding: 13px; gap: 6px; }
+  .map-shortcuts > span { width: 100%; margin-bottom: 3px; }
+  .map-shortcuts button { padding: 8px 10px; }
+  .map-shortcuts .all-states-shortcut { margin-left: 0; }
   .results-panel { padding: 23px; }
   .history-panel, .participation-panel { padding: 22px; }
   .details-section { grid-template-columns: 1fr; }
@@ -261,4 +303,8 @@ footer p span, .footer-year, footer > div { color: #676770; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-explore { transition: none; }
+  .intro-visual, .hero-explore:after, .map-shortcuts button, .map-shortcuts button svg, .map-state path:first-child, .state-table tbody tr { transition: none; }
+  .brazil-map { transition: none; }
+  .intro-visual { transform: none; }
+  .reading-progress { display: none; }
 }

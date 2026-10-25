@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -16,6 +16,7 @@ import {
   Expand,
   Globe2,
   Info,
+  Layers3,
   MapPin,
   Minus,
   Pause,
@@ -97,6 +98,12 @@ function PartyLogo({ candidate }: { candidate: Candidate }) {
 }
 export default function Dashboard() {
   const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const readingProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 28,
+    mass: 0.35,
+  });
   const [demo, setDemo] = useState(false);
   const [uf, setUf] = useState("BR");
   const [data, setData] = useState<Record<string, ApiResponse>>({});
@@ -112,6 +119,7 @@ export default function Dashboard() {
   const [seconds, setSeconds] = useState(45);
   const [webgl, setWebgl] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [relief, setRelief] = useState(false);
   const last = useRef<Record<string, number>>({});
   const inFlight = useRef(new Set<string>());
   const container = useRef<HTMLDivElement>(null);
@@ -352,6 +360,7 @@ export default function Dashboard() {
       : null;
   return (
     <div ref={container} className="app-shell">
+      <motion.div className="reading-progress" style={{ scaleX: readingProgress }} aria-hidden="true" />
       <a className="skip-link" href="#apuracao">
         Ir para os resultados
       </a>
@@ -426,7 +435,25 @@ export default function Dashboard() {
               <span>Uma leitura independente dos dados do TSE.</span>
             </div>
           </div>
-          <div className="intro-visual" aria-hidden="true">
+          <div
+            className="intro-visual"
+            aria-hidden="true"
+            onPointerMove={(event) => {
+              if (reduced || event.pointerType === "touch") return;
+              const rect = event.currentTarget.getBoundingClientRect();
+              const x = (event.clientX - rect.left) / rect.width - 0.5;
+              const y = (event.clientY - rect.top) / rect.height - 0.5;
+              event.currentTarget.style.setProperty("--tilt-x", `${(-y * 7).toFixed(2)}deg`);
+              event.currentTarget.style.setProperty("--tilt-y", `${(x * 9).toFixed(2)}deg`);
+              event.currentTarget.style.setProperty("--glint-x", `${((x + 0.5) * 100).toFixed(1)}%`);
+              event.currentTarget.style.setProperty("--glint-y", `${((y + 0.5) * 100).toFixed(1)}%`);
+            }}
+            onPointerLeave={(event) => {
+              event.currentTarget.style.removeProperty("--tilt-x");
+              event.currentTarget.style.removeProperty("--tilt-y");
+            }}
+          >
+            <span className="intro-visual-glint" />
             <span className="intro-visual-kicker">PRESIDÊNCIA DA REPÚBLICA</span>
             <strong className="intro-year">
               20
@@ -659,7 +686,8 @@ export default function Dashboard() {
           </aside>
           <div className="map-panel">
             <div className="map-topbar">
-              <div className="segmented">
+              <div className="map-view-controls">
+                <div className="segmented">
                 <button
                   onClick={() => setTab("leader")}
                   className={tab === "leader" ? "active" : ""}
@@ -671,6 +699,16 @@ export default function Dashboard() {
                   className={tab === "progress" ? "active" : ""}
                 >
                   Apuração
+                </button>
+                </div>
+                <button
+                  type="button"
+                  className={cn("relief-toggle", relief && "is-active")}
+                  onClick={() => setRelief((value) => !value)}
+                  aria-pressed={relief}
+                  title="Alternar perspectiva do mapa"
+                >
+                  <Layers3 size={14} /> <span>3D</span>
                 </button>
               </div>
               <div className="map-legend">
@@ -709,7 +747,7 @@ export default function Dashboard() {
             </div>
             <div className="map-container">
               <svg
-                className="brazil-map"
+                className={cn("brazil-map", relief && "is-relief")}
                 viewBox="-25 -12 665 650"
                 role="group"
                 aria-label="Mapa interativo dos estados do Brasil"
@@ -915,6 +953,23 @@ export default function Dashboard() {
                   <RefreshCw size={14} className={loading ? "spinning" : ""} />
                 </button>
               </div>
+            </div>
+            <div className="map-shortcuts" aria-label="Atalhos para estados">
+              <span>IR DIRETO PARA</span>
+              {(["SP", "RJ", "MG", "BA", "RS"] as const).map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => select(code)}
+                  aria-pressed={uf === code}
+                  className={uf === code ? "is-active" : ""}
+                >
+                  {code} <ArrowUpRight size={12} />
+                </button>
+              ))}
+              <button type="button" className="all-states-shortcut" onClick={() => document.getElementById("estados")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" })}>
+                27 UFs <ArrowUpRight size={12} />
+              </button>
             </div>
           </div>
         </section>
