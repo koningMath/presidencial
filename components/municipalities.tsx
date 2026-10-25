@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, MapPin, Search } from "lucide-react";
 import type { ApiResponse } from "@/lib/results";
 import type { Municipality } from "@/lib/municipalities";
-import { integer, percent } from "@/lib/utils";
+import { integer } from "@/lib/utils";
+import { AnimatedMetric } from "./animated-metric";
 import states from "@/lib/brazil-map.json";
 
 export function MunicipalityExplorer({ uf, demo }: { uf: string; demo: boolean }) {
@@ -54,17 +55,17 @@ export function MunicipalityExplorer({ uf, demo }: { uf: string; demo: boolean }
       } finally { busy = false; if (!stopped) setUpdating(false); }
     };
     void update();
-    const timer = setInterval(() => void update(), 45000);
+    const timer = setInterval(() => void update(), 15000);
     return () => { stopped = true; clearInterval(timer); };
   }, [city, state, demo]);
 
-  const filtered = useMemo(() => municipalities.filter(item => item.name.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))).slice(0, 60), [municipalities, search]);
+  const filtered = useMemo(() => search.trim().length < 2 ? [] : municipalities.filter(item => item.name.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))).slice(0, 12), [municipalities, search]);
   const municipality = municipalities.find(item => item.code === city);
   const result = snapshot?.result;
 
   return <section className="municipality-explorer" aria-label="Apuração por município">
     <div className="municipality-heading">
-      <div><span className="small-kicker">DETALHAMENTO TERRITORIAL</span><h3>Do Brasil à sua cidade.</h3><p>Resultados municipais diretos do TSE, com atualização a cada 45 segundos.</p></div>
+      <div><span className="small-kicker">DETALHAMENTO TERRITORIAL</span><h3>Do Brasil à sua cidade.</h3><p>Resultados municipais diretos do TSE, com verificação a cada 15 segundos.</p></div>
       <span className="municipality-source"><MapPin size={13}/> EA12 + EA20 · TSE</span>
     </div>
     <div className="municipality-controls">
@@ -78,14 +79,15 @@ export function MunicipalityExplorer({ uf, demo }: { uf: string; demo: boolean }
       </label>
     </div>
     {catalogStatus === "error" && <p className="municipality-note">O catálogo oficial de municípios está temporariamente indisponível.</p>}
-    {catalogStatus === "ready" && !city && <div className="municipality-options" role="listbox" aria-label="Escolher município">
-      {filtered.map(item => <button role="option" aria-selected={false} type="button" key={item.code} onClick={() => {setCity(item.code);setSearch(item.name);}}>{item.name}<ArrowUpRight size={13}/></button>)}
-      {filtered.length === 0 && <p>Nenhuma cidade encontrada.</p>}
-      {municipalities.length > 60 && !search && <small>Exibindo as primeiras 60 de {integer(municipalities.length)} cidades. Digite para filtrar.</small>}
-    </div>}
+    {catalogStatus === "ready" && !city && (search.trim().length < 2
+      ? <p className="municipality-empty">Pesquise pelo menos duas letras para encontrar uma das {integer(municipalities.length)} cidades de {state}.</p>
+      : <div className="municipality-options" role="listbox" aria-label="Escolher município">
+          {filtered.map(item => <button role="option" aria-selected={false} type="button" key={item.code} onClick={() => {setCity(item.code);setSearch(item.name);}}>{item.name}<ArrowUpRight size={13}/></button>)}
+          {filtered.length === 0 && <p>Nenhuma cidade encontrada.</p>}
+        </div>)}
     {city && <div className="municipality-result">
       <div className="municipality-result-title"><div><span className="small-kicker">{municipality?.name} / {state}</span><h4>{demo ? "Dados oficiais indisponíveis em demonstração" : updating && !result ? "Consultando TSE…" : snapshot?.status === "stale" ? "Última parcial disponível" : result?.released ? "Apuração municipal" : "Aguardando divulgação"}</h4></div><button type="button" onClick={() => {setCity("");setSnapshot(null);}} aria-label="Escolher outra cidade">Trocar cidade</button></div>
-      {!demo && result?.released && <><div className="municipality-progress"><strong>{percent(result.progress)}%</strong><span>seções totalizadas · {integer(result.counted)} de {integer(result.sections)}</span></div><div className="municipality-candidates">{result.candidates.map(candidate => <div key={candidate.number}><span>{candidate.name}</span><strong>{percent(candidate.percent)}%</strong><small>{integer(candidate.votes)} votos</small></div>)}</div></>}
+      {!demo && result?.released && <><div className="municipality-progress"><strong><AnimatedMetric value={result.progress} decimals={2}/>%</strong><span>seções totalizadas · <AnimatedMetric value={result.counted}/> de {integer(result.sections)}</span></div><div className="municipality-candidates">{result.candidates.map(candidate => <div key={candidate.number}><span>{candidate.name}</span><strong><AnimatedMetric value={candidate.percent} decimals={2}/>%</strong><small><AnimatedMetric value={candidate.votes}/> votos</small></div>)}</div></>}
       <p className="municipality-note">{demo ? "Desative a demonstração para consultar a cidade." : snapshot?.status === "stale" ? "Conexão indisponível; os números podem estar desatualizados." : result?.released ? `Fonte oficial: ${result.updatedAt}.` : "Sem votos oficialmente divulgados. Nenhum resultado é inferido."} {result?.source && !demo && <a href={result.source} target="_blank" rel="noreferrer">Conferir JSON do TSE ↗</a>}</p>
     </div>}
   </section>;

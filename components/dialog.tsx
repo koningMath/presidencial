@@ -27,13 +27,15 @@ export function InfoDialog({
               6258, cargo 0001, segundo turno. A compatibilidade do arquivo é
               validada antes de exibir qualquer voto.
             </p>
-            <h3>Atualização a cada 45 segundos</h3>
+            <h3>Verificações frequentes, sem estimar votos</h3>
             <p>
-              A UF selecionada é consultada a cada 45 segundos e o mapa a cada
-              90 segundos, com até três consultas simultâneas. As consultas são
+              A UF selecionada e o município aberto são consultados a cada 15 segundos; o mapa, a cada
+              60 segundos, com até três consultas simultâneas. As consultas são
               pausadas em abas ocultas. Em caso de falha, a última parcial
               recebida é preservada e identificada como desatualizada. O horário
-              exibido é o horário informado pelo TSE.
+              exibido é o horário informado pelo TSE. Os arquivos oficiais também
+              podem permanecer em cache na infraestrutura do TSE; consultas mais frequentes
+              não significam votos novos a cada intervalo.
             </p>
             <h3>O que significa “eleito”?</h3>
             <p>
@@ -41,18 +43,18 @@ export function InfoDialog({
               mesmo com 100% das seções, não é usada para declarar um vencedor
               por conta própria.
             </p>
-            <h3>Demonstração e histórico</h3>
+            <h3>Municípios e histórico</h3>
             <p>
-              O modo de demonstração usa números inteiramente fictícios, sem
-              valor eleitoral. O histórico oficial reúne apenas parciais
-              recebidas enquanto esta página está aberta. Sem dados por UF, o
-              mapa permanece neutro.
+              O cadastro municipal é obtido do arquivo oficial EA12. Cada cidade
+              é consultada individualmente no EA20 do TSE. O histórico reúne
+              apenas parciais recebidas enquanto esta página está aberta.
+              Sem dados oficiais por UF, o mapa permanece neutro.
             </p>
             <h3>Imagens e cartografia</h3>
             <p>
-              Imagens dos candidatos: links fornecidos pelo solicitante
-              (Valor/Globo e Google). Nomes e fotos de referência não confirmam
-              candidaturas. Malha estadual: Click That ’Hood / Code for America,
+              Foto do Lula: imagem indicada pelo solicitante, hospedada originalmente
+              em Brasil Paralelo. Foto de Flávio Bolsonaro: imagem de referência do projeto.
+              Malha estadual: Click That ’Hood / Code for America,
               licença dos dados conforme a fonte.
             </p>
             <a

@@ -14,7 +14,7 @@ const cache = new Map<
   { result: Result | null; checked: number; response: ApiResponse }
 >();
 const pending = new Map<string, Promise<ApiResponse>>();
-const TTL = 45000;
+const TTL = 12000;
 async function load(uf: string, city?: string): Promise<ApiResponse> {
   const key = city ? `${uf}:${city}` : uf;
   const previous = cache.get(key);
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
   const response = await pending.get(key);
   return NextResponse.json(response, {
     headers: {
-      "Cache-Control": "public, s-maxage=45, stale-while-revalidate=15",
+      "Cache-Control": "public, s-maxage=12, stale-while-revalidate=3",
     },
   });
 }

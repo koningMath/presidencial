@@ -21,7 +21,6 @@ import {
   Pause,
   Play,
   Plus,
-  Radio,
   RefreshCw,
   Search,
   Share2,
@@ -44,11 +43,14 @@ import states from "@/lib/brazil-map.json";
 import { InfoDialog } from "./dialog";
 import { MathematicalDecision } from "./mathematical";
 import { MunicipalityExplorer } from "./municipalities";
+import { AnimatedMetric } from "./animated-metric";
 const PHOTO: Record<string, string> = {
   "13": "/lula-new.webp",
   "22": "/flavio.jpg",
 };
 const LOGO: Record<string, string> = { "13": "/pt.png", "22": "/pl.png" };
+const SELECTED_REFRESH_MS = 15000;
+const MAP_REFRESH_MS = 60000;
 function color(c?: Candidate) {
   return c?.number === "13"
     ? "#db5361"
@@ -109,7 +111,7 @@ function CandidateSpotlight({ candidate, side, demo, available }: {
       aria-label={`Candidato ${candidate.name}`}
     >
       <div className="spotlight-top">
-        <span className="spotlight-party"><span className="spotlight-dot"/>{candidate.party} / {candidate.number}</span>
+        <span className="spotlight-party"><span className="spotlight-party-logo"><PartyLogo candidate={candidate}/></span>{candidate.party} / {candidate.number}</span>
         <span className="spotlight-ranking">PRESIDÊNCIA · 2026</span>
       </div>
       <div className="spotlight-portrait" aria-hidden="true">
@@ -118,9 +120,9 @@ function CandidateSpotlight({ candidate, side, demo, available }: {
       <div className="spotlight-content">
         <span className="spotlight-label">{demo ? "CENÁRIO FICTÍCIO" : available ? "PARCIAL OFICIAL" : "AGUARDANDO DADOS"}</span>
         <h2>{candidate.name}</h2>
-        <div className="spotlight-percentage">{percent(candidate.percent)}<small>%</small></div>
+        <div className="spotlight-percentage"><AnimatedMetric value={candidate.percent} decimals={2}/><small>%</small></div>
         <div className="spotlight-track"><span style={{ width: `${candidate.percent ?? 0}%` }} /></div>
-        <div className="spotlight-votes"><span>VOTOS VÁLIDOS</span><strong>{integer(candidate.votes)}</strong></div>
+        <div className="spotlight-votes"><span>VOTOS VÁLIDOS</span><strong><AnimatedMetric value={candidate.votes}/></strong></div>
       </div>
     </article>
   );
@@ -133,7 +135,7 @@ export default function Dashboard() {
     damping: 28,
     mass: 0.35,
   });
-  const [demo, setDemo] = useState(false);
+  const demo = false;
   const [uf, setUf] = useState("BR");
   const [data, setData] = useState<Record<string, ApiResponse>>({});
   const [history, setHistory] = useState<Record<string, Result[]>>({});
@@ -145,7 +147,7 @@ export default function Dashboard() {
   const [zoom, setZoom] = useState(1);
   const [hover, setHover] = useState<string | null>(null);
   const [toast, setToast] = useState("");
-  const [seconds, setSeconds] = useState(45);
+  const [seconds, setSeconds] = useState(15);
   const [expanded, setExpanded] = useState(false);
   const [relief, setRelief] = useState(false);
   const last = useRef<Record<string, number>>({});
@@ -153,7 +155,6 @@ export default function Dashboard() {
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    setDemo(params.get("modo") === "demo");
     const initial = params.get("uf")?.toUpperCase();
     if (
       initial &&
@@ -190,18 +191,18 @@ export default function Dashboard() {
       ctx.revert();
     };
   }, [reduced]);
-  const refresh = useCallback(async (target: string) => {
+  const refresh = useCallback(async (target: string, foreground = false) => {
     if (
       inFlight.current.has(target) ||
-      Date.now() - (last.current[target] || 0) < 45000
+      Date.now() - (last.current[target] || 0) < SELECTED_REFRESH_MS
     )
       return;
     inFlight.current.add(target);
     last.current[target] = Date.now();
-    setLoading(true);
-    setSeconds(45);
+    if (foreground) { setLoading(true); setSeconds(15); }
     try {
       const res = await fetch(`/api/results?uf=${target}`, {
+        cache: "no-store",
         signal: AbortSignal.timeout(15000),
       });
       if (!res.ok) throw new Error("HTTP");
@@ -230,21 +231,21 @@ export default function Dashboard() {
       }));
     } finally {
       inFlight.current.delete(target);
-      setLoading(inFlight.current.size > 0);
+      if (foreground) setLoading(false);
     }
   }, []);
   useEffect(() => {
     if (demo || paused) return;
-    void refresh(uf);
+    void refresh(uf, true);
     const tick = setInterval(() => {
       if (!document.hidden) {
         setSeconds(
           Math.max(
             0,
-            45 - Math.floor((Date.now() - (last.current[uf] || 0)) / 1000),
+            15 - Math.floor((Date.now() - (last.current[uf] || 0)) / 1000),
           ),
         );
-        void refresh(uf);
+        void refresh(uf, true);
       }
     }, 1000);
     return () => clearInterval(tick);
@@ -268,7 +269,7 @@ export default function Dashboard() {
       active = false;
     };
     void updateMap();
-    const timer = setInterval(() => void updateMap(), 90000);
+    const timer = setInterval(() => void updateMap(), MAP_REFRESH_MS);
     return () => {
       cancelled = true;
       clearInterval(timer);
@@ -285,12 +286,6 @@ export default function Dashboard() {
     next === "BR"
       ? u.searchParams.delete("uf")
       : u.searchParams.set("uf", next);
-    window.history.replaceState(null, "", u);
-  };
-  const toggleDemo = () => {
-    setDemo((d) => !d);
-    const u = new URL(location.href);
-    demo ? u.searchParams.delete("modo") : u.searchParams.set("modo", "demo");
     window.history.replaceState(null, "", u);
   };
   const response = data[uf];
@@ -413,20 +408,6 @@ export default function Dashboard() {
         </nav>
         <div className="header-actions">
           <button
-            className={cn("demo-toggle", demo && "on")}
-            onClick={toggleDemo}
-          >
-            {demo ? (
-              <>
-                <Radio size={14} /> Ver dados oficiais
-              </>
-            ) : (
-              <>
-                <Play size={13} /> Explorar demonstração
-              </>
-            )}
-          </button>
-          <button
             className="icon-button share-header"
             aria-label="Compartilhar página"
             onClick={share}
@@ -460,21 +441,7 @@ export default function Dashboard() {
             </a>
           </div>
         </section>
-        {demo ? (
-          <div className="status-banner demo-banner" role="status">
-            <span>
-              <Info size={15} />
-              <strong>Modo demonstração</strong>
-              <span>
-                Todos os números e cenários abaixo são fictícios. Não são
-                resultados eleitorais.
-              </span>
-            </span>
-            <button onClick={toggleDemo}>
-              Ir para dados oficiais <ArrowUpRight size={14} />
-            </button>
-          </div>
-        ) : response?.status === "stale" ? (
+        {response?.status === "stale" ? (
           <div className="status-banner warning" role="status">
             <span>
               <Info size={15} />
@@ -556,7 +523,7 @@ export default function Dashboard() {
               <div className="progress-heading">
                 <span>Seções totalizadas</span>
                 <strong>
-                  {percent(result?.progress)}
+                  <AnimatedMetric value={result?.progress} decimals={2}/>
                   <small>%</small>
                 </strong>
               </div>
@@ -567,7 +534,7 @@ export default function Dashboard() {
                 />
               </div>
               <div className="sections-meta">
-                {integer(result?.counted)} de {integer(result?.sections)} seções
+                <AnimatedMetric value={result?.counted}/> de {integer(result?.sections)} seções
               </div>
               <div className="candidates">
                 {candidates.map((c, i) => (
@@ -614,11 +581,11 @@ export default function Dashboard() {
                     </div>
                     <div className="candidate-numbers">
                       <strong>
-                        {percent(c.percent)}
+                        <AnimatedMetric value={c.percent} decimals={2}/>
                         <small>%</small>
                       </strong>
                       <span>
-                        {integer(c.votes)}
+                        <AnimatedMetric value={c.votes}/>
                         <small>votos válidos</small>
                       </span>
                     </div>
@@ -925,7 +892,7 @@ export default function Dashboard() {
                 <span className="refresh-period">
                   {demo
                     ? "Dados fictícios"
-                    : `a cada 45s · próxima em ${seconds}s`}
+                    : `a cada 15s · próxima em ${seconds}s`}
                 </span>
               </div>
               <div>
@@ -941,7 +908,7 @@ export default function Dashboard() {
                 </button>
                 <button
                   className="icon-button"
-                  onClick={() => void refresh(uf)}
+                  onClick={() => void refresh(uf, true)}
                   disabled={demo || loading || seconds > 0}
                   aria-label="Atualizar agora"
                 >
@@ -1254,7 +1221,7 @@ export default function Dashboard() {
           </div>
           <div className="states-footnote">
             <span>
-              Mapa atualizado a cada 90s; UF selecionada, a cada 45s. O total
+              Mapa atualizado a cada 60s; UF selecionada, a cada 15s. O total
               nacional inclui o exterior.
             </span>
             <button
