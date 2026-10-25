@@ -156,7 +156,8 @@ footer { display:none; }
 .view-heading h2 em { font-family:inherit; font-style:normal; color:#9f9fa9; }
 .view-heading p { color:#9f9faa; font-size:13px; }
 .insight-bento { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); flex:1; min-height:0; gap:12px; }
-.insight-card { min-width:0; position:relative; overflow:auto; scrollbar-width:thin; background:linear-gradient(155deg,#24242bd9,#17171cdb); border-radius:25px; border:1px solid #ffffff0c; padding:15px 20px; min-height:0; box-shadow:inset 0 1px #ffffff0c; }
+.insight-card { min-width:0; position:relative; overflow-x:hidden; overflow-y:auto; scrollbar-width:none; background:linear-gradient(155deg,#24242bd9,#17171cdb); border-radius:25px; border:1px solid #ffffff0c; padding:15px 20px; min-height:0; box-shadow:inset 0 1px #ffffff0c; }
+.insight-card::-webkit-scrollbar { display:none; }
 .insight-card:before { content:""; position:absolute; width:250px; height:250px; border-radius:50%; top:-160px; right:-100px; background:var(--glow,#6a83e8); filter:blur(80px); opacity:.25; pointer-events:none; }
 .irreversibility { --glow:#fb6d84; }
 .simulator { --glow:#668dff; }
