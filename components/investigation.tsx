@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import Image from "next/image";
+import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import {
-  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronDown,
-  CircleHelp, Copy, ExternalLink, GitCompareArrows, Info, Menu,
-  Search, SlidersHorizontal, X,
+  ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Check,
+  Copy, ExternalLink, GitCompareArrows, Info, Menu,
+  Search, X,
 } from "lucide-react";
 import official from "@/lib/official-comparison.json";
 import brazilMap from "@/lib/brazil-map.json";
@@ -97,8 +98,8 @@ function RoundRace() {
   const [round, setRound] = useState<1 | 2>(1);
   const isFirst = round === 1;
   const candidates = [
-    { name: "FLÁVIO BOLSONARO", party: "PL · 22", votes: isFirst ? first.flavio : second.flavio, percentage: isFirst ? byUF.BR?.flavio_pct_1 ?? 100 * first.flavio / first.valid : 100 * second.flavio / second.valid, tone: "blue" as const, image: "/flavio.jpg" },
-    { name: "LULA", party: "PT · 13", votes: isFirst ? first.lula : second.lula, percentage: 100 * (isFirst ? first.lula / first.valid : second.lula / second.valid), tone: "red" as const, image: "/lula-new.webp" },
+    { name: "FLÁVIO BOLSONARO", party: "PL · 22", logo: "/pl.png", votes: isFirst ? first.flavio : second.flavio, percentage: 100 * (isFirst ? first.flavio / first.valid : second.flavio / second.valid), tone: "blue" as const, image: "/flavio-uol-2026.jpg" },
+    { name: "LULA", party: "PT · 13", logo: "/pt.png", votes: isFirst ? first.lula : second.lula, percentage: 100 * (isFirst ? first.lula / first.valid : second.lula / second.valid), tone: "red" as const, image: "/lula-new.webp" },
   ];
   const leader = candidates[0].votes > candidates[1].votes ? candidates[0] : candidates[1];
   return (
@@ -117,8 +118,8 @@ function RoundRace() {
       <div className="inv-race-grid">
         {candidates.map((candidate) => (
           <motion.article key={candidate.name} layout className={`inv-candidate inv-candidate-${candidate.tone} ${leader.name === candidate.name ? "inv-candidate-leading" : ""}`}>
-            <div className="inv-candidate-photo" style={{ backgroundImage: `linear-gradient(180deg, transparent 15%, #0e0e10 100%), url('${candidate.image}')` }} aria-hidden="true" />
-            <span className="inv-candidate-id">{candidate.party} <span className="inv-candidate-dot" /></span>
+            <div className="inv-candidate-photo" aria-hidden="true"><Image src={candidate.image} alt="" fill sizes="(max-width: 640px) 50vw, (max-width: 1250px) 48vw, 34vw" /></div>
+            <span className="inv-candidate-id"><span className="inv-party-mark"><Image src={candidate.logo} alt="" width={30} height={30} /></span>{candidate.party} <span className="inv-candidate-dot" /></span>
             <div className="inv-candidate-data">
               <span className="inv-candidate-caption">{leader.name === candidate.name ? "MAIOR VOTAÇÃO DO TURNO" : "SEGUNDO COLOCADO"}</span>
               <h3>{candidate.name}</h3>
@@ -173,52 +174,44 @@ function FlowAccounting() {
       </div>
       <div className="inv-big-translation" data-reveal>
         <div><Kicker>EM LINGUAGEM DIRETA</Kicker><h3><span>3 em 4</span> votos líquidos adicionais dos dois finalistas foram para Lula.</h3></div>
-        <div className="inv-quarters" aria-label="Aproximadamente três quartos dos votos líquidos adicionais ficaram com Lula"><span /><span /><span /><span /></div>
+        <div className="inv-dot-graphic" aria-label="74 de 100 pontos destacados em vermelho para representar aproximadamente 73,6%"><div className="inv-dot-matrix">{Array.from({ length: 100 }, (_, i) => <i key={i} className={i < 74 ? "red" : "blue"} />)}</div><div className="inv-dot-key"><span><i className="red" /> LULA · 73,60%</span><span><i className="blue" /> FLÁVIO · 26,40%</span></div></div>
       </div>
       <Footnote>“3 em 4” descreve a distribuição do <strong>ganho líquido de votos dos finalistas</strong>, não uma medição individual de como cada novo eleitor votou. A urna registra totais, não uma trilha de migração entre turnos.</Footnote>
     </section>
   );
 }
 
-function ScenarioLab() {
-  const [attendShare, setAttendShare] = useState(100);
-  const [invalidShare, setInvalidShare] = useState(100);
-  const [showMath, setShowMath] = useState(false);
-  const expectedFromNew = change.attended * attendShare / 100 + (first.blank + first.null - second.blank - second.null) * invalidShare / 100;
-  const neededOther = change.lula - expectedFromNew;
-  const neededPct = 100 * neededOther / first.others;
-  const remainingFlavio = first.others - neededOther;
-  const within = neededPct >= 0 && neededPct <= 100;
-  const preset = (a: number, b: number) => { setAttendShare(a); setInvalidShare(b); };
+const fixedScenarios = [
+  { label: "A HIPÓTESE MAIS FAVORÁVEL", title: "Tudo dos novos fluxos para Lula", allocation: 1, note: "100% do aumento líquido de presença e 100% da redução de inválidos atribuídos a Lula.", tone: "green" },
+  { label: "DISTRIBUIÇÃO EQUILIBRADA", title: "Metade de cada fluxo para Lula", allocation: .5, note: "50% do comparecimento líquido adicional e 50% da redução de inválidos atribuídos a Lula.", tone: "orange" },
+  { label: "HIPÓTESE-LIMITE", title: "Sem acréscimo desses fluxos", allocation: 0, note: "0% desses dois fluxos atribuídos a Lula; o modelo restrito precisaria de votos além do grupo eliminado.", tone: "red" },
+].map((scenario) => ({
+  ...scenario,
+  needed: 100 * (change.lula - scenario.allocation * (change.attended + first.blank + first.null - second.blank - second.null)) / first.others,
+}));
+
+function FixedScenarios() {
   return (
     <section className="inv-lab-section" id="simulador">
       <div className="inv-section-title" data-reveal>
-        <div><Kicker>03 / SIMULADOR DE FLUXOS</Kicker><h2>Faça a conta.<br /><em>Mova as hipóteses.</em></h2></div>
-        <p>Escolha quanto do aumento líquido de participação e da redução de votos inválidos você atribui a Lula. O sistema calcula a fatia necessária dos eliminados.</p>
+        <div><Kicker>03 / CENÁRIOS FECHADOS</Kicker><h2>Quanto teria<br /><em>de migrar?</em></h2></div>
+        <p>Três hipóteses prontas, calculadas com os votos oficiais. Nenhum parâmetro para ajustar: as exigências de cada cenário estão expostas.</p>
       </div>
-      <div className="inv-lab-grid">
-        <div className="inv-lab-controls">
-          <div className="inv-lab-top"><span className="inv-live-tag"><SlidersHorizontal size={12} /> LABORATÓRIO INTERATIVO</span><button onClick={() => preset(100, 100)} className="inv-reset">REDEFINIR ↺</button></div>
-          <label htmlFor="inv-attendance"><span>01. Ganho líquido de comparecimento</span><strong>{attendShare}% <small>→ LULA</small></strong></label>
-          <input id="inv-attendance" className="inv-range" type="range" min="0" max="100" step="1" value={attendShare} onChange={(e) => setAttendShare(Number(e.target.value))} style={{ "--range-fill": `${attendShare}%` } as React.CSSProperties} />
-          <div className="inv-range-scale"><span>0% PARA LULA</span><span>{short(change.attended)} DE VOTOS</span><span>100%</span></div>
-          <label htmlFor="inv-invalid"><span>02. Redução de brancos e nulos</span><strong>{invalidShare}% <small>→ LULA</small></strong></label>
-          <input id="inv-invalid" className="inv-range" type="range" min="0" max="100" step="1" value={invalidShare} onChange={(e) => setInvalidShare(Number(e.target.value))} style={{ "--range-fill": `${invalidShare}%` } as React.CSSProperties} />
-          <div className="inv-range-scale"><span>0% PARA LULA</span><span>{short(first.blank + first.null - second.blank - second.null)} DE VOTOS</span><span>100%</span></div>
-          <div className="inv-presets"><span>TESTE RÁPIDO</span><button onClick={() => preset(100, 100)}>100% / 100%</button><button onClick={() => preset(75, 75)}>75% / 75%</button><button onClick={() => preset(50, 50)}>50% / 50%</button><button onClick={() => preset(0, 0)}>0% / 0%</button></div>
-          <button onClick={() => setShowMath((v) => !v)} className="inv-explain-button" aria-expanded={showMath}><CircleHelp size={15} /> COMO O CÁLCULO FUNCIONA <ChevronDown size={15} className={showMath ? "rotated" : ""} /></button>
-          <AnimatePresence>{showMath && <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="inv-explain-text">Necessidade entre eliminados = [10.376.694 − (2.960.239 × taxa A) − (1.821.246 × taxa B)] ÷ 9.316.747. É um cenário de ganhos líquidos: supõe que não há troca direta de votos entre os dois finalistas nem mudanças compensatórias ocultas.</motion.p>}</AnimatePresence>
-        </div>
-        <div className="inv-lab-outcome">
-          <span className="inv-result-eyebrow">PARA RECONCILIAR O GANHO DE LULA, SERIA NECESSÁRIO...</span>
-          <div className="inv-result-number"><Count value={neededPct} decimals={1} suffix="%" /></div>
-          <h3>dos votos de candidatos eliminados destinados a Lula.</h3>
-          <div className="inv-spectrum"><motion.div animate={{ width: `${Math.min(100, Math.max(0, neededPct))}%` }} transition={{ type: "spring", stiffness: 80, damping: 20 }} /></div>
-          <div className="inv-spectrum-labels"><span>LULA · {neededPct < 0 ? "—" : short(neededOther)}</span><span>FLÁVIO · {remainingFlavio < 0 ? "—" : short(remainingFlavio)}</span></div>
-          <div className={`inv-model-status ${within ? "inv-model-valid" : "inv-model-warning"}`}><span>{within ? <Check size={15} /> : <Info size={15} />}</span>{within ? "A hipótese fecha a identidade numérica sob essas premissas." : "Essa combinação ultrapassa o universo de votos eliminados. O modelo exigiria outros fluxos, como mudanças diretas entre finalistas."}</div>
-          <span className="inv-model-legend">MODELO CONDICIONAL · NÃO É INFERÊNCIA SOBRE ELEITORES IDENTIFICÁVEIS</span>
-        </div>
+      <div className="inv-fixed-intro" data-reveal><div><span>UNIVERSO DE CANDIDATOS ELIMINADOS</span><strong>{format(first.others)}</strong><small>votos no primeiro turno</small></div><p>Para explicar o ganho líquido de <b>10.376.694 votos de Lula</b>, que fatia desse universo seria necessária <em>em cada hipótese</em>?</p><span className="inv-fixed-formula">(10.376.694 − novos fluxos atribuídos a Lula) ÷ 9.316.747</span></div>
+      <div className="inv-fixed-grid">
+        {fixedScenarios.map((scenario, index) => <article key={scenario.label} className={`inv-fixed-card inv-fixed-${scenario.tone}`} data-reveal>
+          <div className="inv-fixed-number">0{index + 1}<span>{scenario.label}</span></div>
+          <h3>{scenario.title}</h3>
+          <span className="inv-fixed-axis-label">FATIA NECESSÁRIA DOS ELIMINADOS</span>
+          <div className="inv-fixed-pct"><Count value={scenario.needed} decimals={2} suffix="%" /></div>
+          <div className="inv-fixed-meter"><span style={{ width: `${Math.min(100, scenario.needed)}%` }} /></div>
+          <div className="inv-fixed-ruler"><span>0%</span><span>100% DO UNIVERSO</span></div>
+          <div className="inv-fixed-dots" aria-hidden="true">{Array.from({ length: 40 }, (_, i) => <i key={i} className={i < scenario.needed / 100 * 40 ? "filled" : ""} />)}</div>
+          <p>{scenario.note}</p>
+          <div className="inv-fixed-foot">{scenario.needed > 100 ? "ULTRAPASSA 100% NESTE MODELO RESTRITO" : "FECHA A SOMA NESTE MODELO RESTRITO"}</div>
+        </article>)}
       </div>
+      <Footnote>Cada quadro usa apenas ganhos líquidos, sem migração direta entre Lula e Flávio nem fluxos brutos que se compensem. A exigência de 111,38% significa que <strong>essa hipótese restrita</strong> requer outros fluxos para fechar — por exemplo, mudanças diretas entre finalistas.</Footnote>
       <div className="inv-poll-note"><div><Kicker>O QUE A PESQUISA INDICAVA</Kicker><h3>Transferência declarada<br /><em>não é voto observado.</em></h3></div><p>Na pesquisa Quaest de 21/10, as preferências declaradas entre grupos dos três principais eliminados eram divergentes. Aplicadas literalmente em um cenário sem outras migrações, as taxas não explicariam sozinhas todo o ganho líquido de Lula.</p><a href="#pesquisas">EXAMINAR PESQUISAS <ArrowRight size={15} /></a></div>
     </section>
   );
@@ -244,10 +237,10 @@ function StateExplorer() {
       <div className="inv-map-grid">
         <div className="inv-map-panel">
           <div className="inv-map-top"><span>BRASIL / VITÓRIA POR UF</span><div className="inv-map-switch" role="group" aria-label="Turno do mapa"><button className={round === 1 ? "on" : ""} onClick={() => setRound(1)}>1º</button><button className={round === 2 ? "on" : ""} onClick={() => setRound(2)}>2º</button></div></div>
-          <div className="inv-map-display"><svg viewBox="-25 -12 665 650" role="group" aria-label="Mapa interativo do Brasil com resultados estaduais"><defs><pattern id="inv-map-grid" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".45" fill="#fff" opacity=".12" /></pattern></defs>{brazilMap.map((state) => {
+          <div className="inv-map-display"><svg viewBox="-25 -12 665 650" role="group" aria-label="Mapa interativo do Brasil com resultados estaduais"><defs><pattern id="inv-map-grid" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".45" fill="#fff" opacity=".14" /></pattern></defs>{brazilMap.map((state) => {
             const item = byUF[state.uf];
             const leader = round === 1 ? item.winner1 : item.winner2;
-            return <g key={state.uf} role="button" tabIndex={0} aria-label={`${state.name}, ${leader === "L" ? "Lula" : "Flávio"} à frente`} aria-pressed={selected === state.uf} onClick={() => setSelected(state.uf)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelected(state.uf); } }} className={`inv-map-uf ${selected === state.uf ? "selected" : ""}`}><path d={state.path} fill={leader === "L" ? "#e86070" : "#5378d4"} /><path d={state.path} fill="url(#inv-map-grid)" /><text x={state.x} y={state.y} textAnchor="middle">{state.uf}</text></g>;
+            return <g key={state.uf} role="button" tabIndex={0} aria-label={`${state.name}, ${leader === "L" ? "Lula" : "Flávio"} à frente`} aria-pressed={selected === state.uf} onClick={() => setSelected(state.uf)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelected(state.uf); } }} className={`inv-map-uf ${selected === state.uf ? "selected" : ""}`}><path d={state.path} fill={leader === "L" ? "#e65c69" : "#4774d6"} /><path d={state.path} fill="url(#inv-map-grid)" /><text x={state.x} y={state.y} textAnchor="middle">{state.uf}</text></g>;
           })}</svg></div>
           <div className="inv-map-legend"><span><i className="red" />LULA</span><span><i className="blue" />FLÁVIO</span><span className="inv-map-hint">SELECIONE UM ESTADO</span></div>
         </div>
@@ -280,7 +273,7 @@ function HistoryAndPolls() {
       <div id="pesquisas" className="inv-poll-section"><div className="inv-section-title"><div><Kicker>06 / A LEITURA DAS PESQUISAS</Kicker><h2>O que apontavam<br /><em>antes da votação.</em></h2></div><p>Os levantamentos da reta final e as entrevistas de transferência de voto fornecem parâmetros para testar hipóteses.</p></div>
         <div className="inv-poll-grid"><div className="inv-poll-card"><span>INTENÇÃO DE VOTO VÁLIDO · RETA FINAL</span><div><strong>51<span>%</span></strong><span>FLÁVIO · DATAFOLHA / QUAEST</span></div><div><strong>49<span>%</span></strong><span>LULA · DATAFOLHA / QUAEST</span></div><p>A apuração terminou em 51,79% para Lula e 48,21% para Flávio — uma inversão em relação à estimativa central das duas pesquisas.</p></div><div className="inv-poll-card"><span>QUAEST · MIGRAÇÃO DECLARADA / 21 OUT</span><div className="inv-poll-row"><span>ELEITORES DE CURY</span><strong>48% <small>LULA</small> · 33% <small>FLÁVIO</small></strong></div><div className="inv-poll-row"><span>ELEITORES DE RENAN</span><strong>25% <small>LULA</small> · 51% <small>FLÁVIO</small></strong></div><div className="inv-poll-row"><span>ELEITORES DE CAIADO</span><strong>25% <small>LULA</small> · 51% <small>FLÁVIO</small></strong></div><p>Percentuais de subgrupos da pesquisa, sujeitos a erro amostral maior que o da amostra total.</p></div></div>
         <div className="inv-poll-bottom"><span>O RESULTADO OFICIAL</span><strong>51,79% LULA</strong><span>×</span><strong>48,21% FLÁVIO</strong><span>AMOSTRA ≠ CONTAGEM DE VOTOS</span></div>
-        <Footnote>As pesquisas amostram intenções declaradas em momentos específicos. O simulador acima permite investigar o quanto as transferências assumidas teriam de variar; resultados de pesquisas não são entradas da soma oficial.</Footnote>
+        <Footnote>As pesquisas amostram intenções declaradas em momentos específicos. Os três cenários anteriores explicitam as transferências hipotéticas; resultados de pesquisas não são entradas da soma oficial.</Footnote>
         <div className="inv-poll-sources">
           <a href="https://www1.folha.uol.com.br/poder/2026/10/datafolha-flavio-bolsonaro-tem-51-dos-votos-validos-e-lula-49-em-empate-tecnico.shtml" target="_blank" rel="noreferrer">DATAFOLHA · 24/10 <ExternalLink size={12} /></a>
           <a href="https://www1.folha.uol.com.br/poder/2026/10/quaest-flavio-bolsonaro-marca-51-dos-votos-validos-e-lula-tem-49-na-vespera-da-eleicao.shtml" target="_blank" rel="noreferrer">QUAEST · 24/10 <ExternalLink size={12} /></a>
@@ -324,11 +317,11 @@ export default function Investigation() {
   }, [reduced]);
   return <div className="investigation-page" ref={root}>
     <motion.div className="inv-reading-line" style={{ scaleX: progress }} aria-hidden="true" />
-    <header className="inv-nav"><a href="/" aria-label="Voltar à apuração do Pulso"><Brand /></a><nav className={menuOpen ? "open" : ""} aria-label="Navegação da análise"><a href="#placar" onClick={() => setMenuOpen(false)}>PLACAR</a><a href="#equacao" onClick={() => setMenuOpen(false)}>A EQUAÇÃO</a><a href="#simulador" onClick={() => setMenuOpen(false)}>SIMULADOR <span>LIVE</span></a><a href="#estados" onClick={() => setMenuOpen(false)}>ESTADOS</a><a href="#historia" onClick={() => setMenuOpen(false)}>HISTÓRIA</a><a href="#fontes" onClick={() => setMenuOpen(false)}>FONTES</a></nav><div className="inv-nav-actions"><a className="inv-return" href="/"><ArrowLeft size={14} /> APURAÇÃO</a><button className="inv-menu-toggle" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button></div></header>
+    <header className="inv-nav"><a href="/" aria-label="Voltar à apuração do Pulso"><Brand /></a><nav className={menuOpen ? "open" : ""} aria-label="Navegação da análise"><a href="#placar" onClick={() => setMenuOpen(false)}>PLACAR</a><a href="#equacao" onClick={() => setMenuOpen(false)}>A EQUAÇÃO</a><a href="#simulador" onClick={() => setMenuOpen(false)}>CENÁRIOS <span>03</span></a><a href="#estados" onClick={() => setMenuOpen(false)}>ESTADOS</a><a href="#historia" onClick={() => setMenuOpen(false)}>HISTÓRIA</a><a href="#fontes" onClick={() => setMenuOpen(false)}>FONTES</a></nav><div className="inv-nav-actions"><a className="inv-return" href="/"><ArrowLeft size={14} /> APURAÇÃO</a><button className="inv-menu-toggle" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button></div></header>
     <main>
-      <section className="inv-hero" id="inicio"><div className="inv-hero-grid" aria-hidden="true" /><div className="inv-hero-top"><Kicker color="red">DOS ARQUIVOS DO TSE / ELEIÇÃO 2026</Kicker><span>EDIÇÃO ESPECIAL — 27.10.2026</span></div><div className="inv-hero-layout"><div className="inv-hero-copy"><p className="inv-hero-serial">PULSO / INVESTIGAÇÃO Nº 01</p><h1>A conta<br />da <em>virada.</em></h1><p className="inv-hero-lead">De uma vantagem de <strong>2,2 milhões</strong> para Flávio a uma vitória de <strong>4,43 milhões</strong> para Lula. O que precisou mudar entre os dois turnos?</p><div className="inv-hero-ctas"><a className="inv-cta-primary" href="#equacao">EXPLORAR OS NÚMEROS <ArrowDown size={15} /></a><a className="inv-cta-text" href="#simulador">TESTAR CENÁRIOS <ArrowUpRight size={15} /></a></div></div><div className="inv-hero-stage"><div className="inv-orbit-container">{!reduced && orbital ? <Orbit /> : <div className="inv-orbit-static" />}</div><span className="inv-orbit-index">Δ / 6.655.156</span><div className="inv-orbit-caption"><span>VARIAÇÃO DA MARGEM</span><strong>+{short(swing)}</strong><span>EM FAVOR DE LULA</span></div><button className="inv-orbit-button" onClick={() => setOrbital(!orbital)}>{orbital ? "PAUSAR VISUAL 3D" : "ATIVAR VISUAL 3D"}</button></div></div><div className="inv-hero-bottom"><div><span>01 / PRIMEIRO TURNO</span><strong>FLÁVIO <b>+{short(firstMargin)}</b></strong></div><div><span>02 / SEGUNDO TURNO</span><strong>LULA <b>+{short(secondMargin)}</b></strong></div><div className="inv-hero-down"><span>ROLE PARA INVESTIGAR</span><ArrowDown size={18} /></div></div></section>
+      <section className="inv-hero" id="inicio"><div className="inv-hero-grid" aria-hidden="true" /><div className="inv-hero-top"><Kicker color="red">ESPECIAL / DADOS OFICIAIS DO TSE</Kicker><span>ELEIÇÃO PRESIDENCIAL DE 2026 · 27 OUT</span></div><div className="inv-hero-layout"><div className="inv-hero-copy"><p className="inv-hero-serial"><span className="inv-edition-mark">01</span> A LEITURA DOS NÚMEROS / PULSO</p><h1>A conta<br />da <em>virada.</em></h1><p className="inv-hero-lead">Uma vantagem de <strong>2,22 milhões</strong> para Flávio no primeiro turno. Uma vitória de <strong>4,43 milhões</strong> para Lula no segundo. <span>O que precisou acontecer entre os dois?</span></p><div className="inv-hero-ctas"><a className="inv-cta-primary" href="#equacao">ABRIR A EQUAÇÃO <ArrowDown size={15} /></a><a className="inv-cta-text" href="#simulador">VER OS CENÁRIOS PRONTOS <ArrowUpRight size={15} /></a></div><div className="inv-hero-proof"><span><i /> 100% DOS VOTOS APURADOS</span><span>28 LOCAIS CONFERIDOS</span></div></div><div className="inv-hero-stage"><div className="inv-hero-photo inv-hero-photo-flavio"><div className="inv-hero-photo-image"><Image src="/flavio-uol-2026.jpg" alt="Retrato de Flávio Bolsonaro" fill priority sizes="(max-width: 960px) 45vw, 23vw" /></div><div className="inv-hero-photo-info"><span className="inv-portrait-party"><Image src="/pl.png" alt="Símbolo do PL" width={35} height={35} /></span><span><b>Flávio Bolsonaro</b><small>PL · Nº 22</small></span></div><div className="inv-hero-photo-round"><Image src="/pl.png" alt="" width={17} height={17} />1º TURNO / À FRENTE</div></div><div className="inv-hero-photo inv-hero-photo-lula"><div className="inv-hero-photo-image"><Image src="/lula-new.webp" alt="Retrato de Lula" fill priority sizes="(max-width: 960px) 45vw, 23vw" /></div><div className="inv-hero-photo-info"><span className="inv-portrait-party"><Image src="/pt.png" alt="Símbolo do PT" width={35} height={35} /></span><span><b>Luiz Inácio Lula da Silva</b><small>PT · Nº 13</small></span></div><div className="inv-hero-photo-round"><Image src="/pt.png" alt="" width={17} height={17} />2º TURNO / ELEITO</div></div><div className="inv-hero-delta"><span>Δ MUDANÇA DA MARGEM</span><strong>6,66<small>mi</small></strong><i /> <b>6.655.156 VOTOS DE DIFERENÇA</b></div><button className="inv-orbit-button" onClick={() => setOrbital(!orbital)}>{orbital ? "FECHAR VISUAL 3D ×" : "EXPLORAR VOLUME 3D ↗"}</button>{!reduced && orbital && <div className="inv-orbit-popover"><Orbit /></div>}</div></div><div className="inv-hero-bottom"><div><span>01 / PRIMEIRO TURNO</span><strong>FLÁVIO <b>+{short(firstMargin)}</b></strong></div><div><span>02 / SEGUNDO TURNO</span><strong>LULA <b>+{short(secondMargin)}</b></strong></div><div className="inv-hero-down"><span>DESÇA PARA VER A CONTA</span><ArrowDown size={18} /></div></div></section>
       <div className="inv-marquee" aria-hidden="true"><div>{Array.from({ length: 4 }, (_, i) => <span key={i}>VOTOS OFICIAIS <i /> DIFERENÇA ENTRE TURNOS <i /> SIMULAÇÕES AUDITÁVEIS <i /></span>)}</div></div>
-      <RoundRace /><FlowAccounting /><ScenarioLab /><StateExplorer /><HistoryAndPolls /><Sources />
+      <RoundRace /><FlowAccounting /><FixedScenarios /><StateExplorer /><HistoryAndPolls /><Sources />
     </main>
     <footer className="inv-footer"><Brand /><span>UMA ANÁLISE INDEPENDENTE SOBRE DADOS PÚBLICOS DO TSE</span><a href="#inicio">VOLTAR AO TOPO ↑</a><span>© PULSO · 2026</span></footer>
   </div>;
