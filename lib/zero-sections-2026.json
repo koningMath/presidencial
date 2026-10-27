@@ -1,0 +1,33 @@
+{
+  "description": "Seções com zero voto para cada finalista, por turno, em arquivo nacional do TSE (presidente). A linha do candidato não existe no CSV quando ele recebe zero votos; seções são identificadas por UF, município, zona e seção.",
+  "source": "https://cdn.tse.jus.br/estatistica/sead/odsele/votacao_secao/votacao_secao_2026_BR.zip",
+  "source_catalog": "https://dadosabertos.tse.jus.br/dataset/resultados-2026",
+  "generated_at": "26/10/2026",
+  "source_rows": 5731614,
+  "sections_first": 499206,
+  "sections_second": 499205,
+  "flavio": {
+    "first_zero": 81,
+    "second_zero": 106,
+    "absolute_delta": 25,
+    "relative_delta_pct": 30.864197530864196,
+    "first_share_pct": 0.01622576651722936,
+    "second_share_pct": 0.021233761681072907,
+    "in_both": 50,
+    "zero_only_first": 31,
+    "zero_only_second": 56,
+    "opponent_votes_second": 14860
+  },
+  "lula": {
+    "first_zero": 8,
+    "second_zero": 4,
+    "absolute_delta": -4,
+    "relative_delta_pct": -50,
+    "first_share_pct": 0.001602544841207838,
+    "second_share_pct": 0.0008012740257008643,
+    "in_both": 4,
+    "zero_only_first": 4,
+    "zero_only_second": 0,
+    "opponent_votes_second": 296
+  }
+}
