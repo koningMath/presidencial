@@ -401,6 +401,7 @@ export default function Dashboard() {
           <a href="#apuracao" className="nav-active">Apuração <span>AO VIVO</span></a>
           <a href="#matematica">Matemática</a>
           <a href="#estados">Por estado</a>
+          <a href="/analise">A conta da virada <ArrowUpRight size={13} /></a>
           <button onClick={() => setInfo(true)}>
             Entenda os dados <ArrowUpRight size={13} />
           </button>
