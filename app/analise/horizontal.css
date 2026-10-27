@@ -6,7 +6,7 @@
 .pulse-audit .pa-nav nav{gap:25px}
 .pa-story{position:relative;width:100%;height:calc(100dvh - 76px);min-height:660px;overflow:hidden;background:#f8faf7}
 .pa-story-rail{height:100%;width:max-content;display:flex;flex-wrap:nowrap;will-change:transform}
-.pa-story .pa-slide{flex:0 0 100vw;width:100vw;max-width:none;height:100%;min-height:0;margin:0;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#c7d7c9 transparent}
+.pa-story .pa-slide{flex:0 0 100vw;width:100vw;max-width:none;height:100%;min-height:0;margin:0;overflow:visible;scrollbar-width:thin;scrollbar-color:#c7d7c9 transparent}
 .pa-story .pa-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:5%;align-content:center;align-items:center;padding:24px 6vw 62px}
 .pa-story .pa-hero-copy h1{font-size:clamp(69px,7.5vw,113px)}
 .pa-story .pa-portrait-image{aspect-ratio:.8;max-height:48vh}
