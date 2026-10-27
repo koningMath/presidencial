@@ -89,7 +89,8 @@
 .inv-hero-photo-info small { color:#677269; font-size:9px; font-weight:750; }
 .inv-portrait-party { display:grid; place-items:center; width:43px; height:43px; flex:0 0 43px; border-radius:50%; background:white; border:1px solid #e0e5df; overflow:hidden; }
 .inv-portrait-party img { width:32px; height:32px; object-fit:contain; }
-.inv-hero-photo-round { position:absolute; left:14px; top:14px; color:#fff; font-size:9px; font-weight:850; letter-spacing:.08em; padding:7px 10px; border-radius:5px; background:#244a94d9; }
+.inv-hero-photo-round { position:absolute; left:14px; top:14px; display:flex; align-items:center; gap:7px; color:#fff; font-size:9px; font-weight:850; letter-spacing:.08em; padding:7px 10px; border-radius:5px; background:#244a94d9; }
+.inv-hero-photo-round img { width:17px; height:17px; padding:2px; background:#fff; border-radius:50%; object-fit:contain; }
 .inv-hero-photo-lula .inv-hero-photo-round { background:#bb3846e8; }
 .inv-hero-delta { position:absolute; z-index:3; left:6%; bottom:4%; background:#dff9e5; border:1px solid #b3e9c5; box-shadow:0 12px 28px #264d3520; border-radius:10px; padding:16px 21px 17px; min-width:270px; display:grid; gap:2px; transform:rotate(-3deg); }
 .inv-hero-delta>span { color:#4c7e61; font-size:9px; letter-spacing:.1em; font-weight:900; }
