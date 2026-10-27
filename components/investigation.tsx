@@ -302,7 +302,7 @@ function Sources() {
 
 export default function Investigation() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [orbital, setOrbital] = useState(true);
+  const [orbital, setOrbital] = useState(false);
   const reduced = useReducedMotion();
   const root = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
