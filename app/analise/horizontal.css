@@ -4,7 +4,7 @@
 .pulse-audit .pa-brand>small{border:0;padding-left:0}
 .pulse-audit .pa-nav{position:sticky;top:0;z-index:50;box-shadow:none;border:0}
 .pulse-audit .pa-nav nav{gap:25px}
-.pa-story{position:relative;width:100%;height:calc(100dvh - 76px);min-height:660px;overflow:hidden;background:#f8faf7}
+.pa-story{position:relative;width:100%;height:calc(100dvh - 76px);min-height:660px;overflow-x:clip;overflow-y:visible;background:#f8faf7}
 .pa-story-rail{height:100%;width:max-content;display:flex;flex-wrap:nowrap;will-change:transform}
 .pa-story .pa-slide{flex:0 0 100vw;width:100vw;max-width:none;height:100%;min-height:0;margin:0;overflow:visible;scrollbar-width:thin;scrollbar-color:#c7d7c9 transparent}
 .pa-story .pa-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:5%;align-content:center;align-items:center;padding:24px 6vw 62px}
