@@ -30,6 +30,40 @@ const slideTotal = 7;
 const number = (value: number) => new Intl.NumberFormat("pt-BR").format(value);
 const pct = (value: number, digits = 2) => `${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value)}%`;
 
+function HundredDots({ value }: { value: number }) {
+  const filled = Math.round(value);
+  return <div className="pa-hundred-dots" role="img" aria-label={`${pct(value)} de 100 votos líquidos adicionais`}>
+    {Array.from({ length: 100 }, (_, index) => <i key={index} className={index < filled ? "is-on" : ""} />)}
+  </div>;
+}
+
+function TwoTurnPlot() {
+  const plotY = (votes: number) => 194 - ((votes - 50_000_000) / 16_000_000) * 155;
+  const lulaStart = plotY(one.lula);
+  const lulaEnd = plotY(two.lula);
+  const flavioStart = plotY(one.flavio);
+  const flavioEnd = plotY(two.flavio);
+
+  return <div className="pa-turn-plot-wrap">
+    <div className="pa-plot-top"><span>EVOLUÇÃO DOS VOTOS</span><b>1º → 2º TURNO</b></div>
+    <svg className="pa-turn-plot" viewBox="0 0 980 230" role="img" aria-label={`Lula: ${number(one.lula)} para ${number(two.lula)}. Flávio: ${number(one.flavio)} para ${number(two.flavio)} votos.`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="pa-lula-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#ff787e"/><stop offset="1" stopColor="#ff455c"/></linearGradient>
+        <linearGradient id="pa-flavio-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#4871e8"/><stop offset="1" stopColor="#41b8ff"/></linearGradient>
+        <linearGradient id="pa-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff586f" stopOpacity=".14"/><stop offset="1" stopColor="#ff586f" stopOpacity="0"/></linearGradient>
+      </defs>
+      {[52,105,158,211].map(y => <path key={y} d={`M 24 ${y} H 956`} className="pa-plot-grid"/>)}
+      <path d={`M 60 ${lulaStart} L 920 ${lulaEnd} L 920 211 L 60 211 Z`} fill="url(#pa-chart-fill)"/>
+      <path d={`M 60 ${flavioStart} L 920 ${flavioEnd}`} stroke="url(#pa-flavio-gradient)" className="pa-plot-line"/>
+      <path d={`M 60 ${lulaStart} L 920 ${lulaEnd}`} stroke="url(#pa-lula-gradient)" className="pa-plot-line"/>
+      <circle cx="60" cy={flavioStart} r="6" fill="#5f8aff"/><circle cx="920" cy={flavioEnd} r="7" fill="#46b4ff"/>
+      <circle cx="60" cy={lulaStart} r="6" fill="#ff787e"/><circle cx="920" cy={lulaEnd} r="7" fill="#ff4c61"/>
+      <text x="60" y="225" className="pa-plot-tick" textAnchor="middle">1º TURNO</text>
+      <text x="920" y="225" className="pa-plot-tick" textAnchor="middle">2º TURNO</text>
+    </svg>
+  </div>;
+}
+
 const contenders = [
   { key: "flavio" as const, short: "FLÁVIO", name: "Flávio Bolsonaro", label: "PL · 22", photo: "/flavio-uol-2026.jpg", party: "/pl.png", first:one.flavio, second:two.flavio, gain:delta.flavio },
   { key: "lula" as const, short: "LULA", name: "Luiz Inácio Lula da Silva", label: "PT · 13", photo: "/lula-new.webp", party: "/pt.png", first:one.lula, second:two.lula, gain:delta.lula },
@@ -127,6 +161,7 @@ export default function InvestigationCompact() {
           <section className="pa-gains pa-slide" id="saldos">
             <span className="pa-eyebrow">01 / VOTOS ADICIONAIS</span>
             <div className="pa-gains-top"><div><h2>O salto dos <em>finalistas.</em></h2><p>De todos os votos líquidos adicionais dos dois finalistas, quase três quartos ficaram com Lula.</p></div><div className="pa-gain-callout"><strong>3 em 4</strong><span>votos líquidos adicionais dos finalistas foram para Lula.</span></div></div>
+            <div className="pa-gains-visual"><TwoTurnPlot/><div className="pa-gains-matrix"><span>VOTOS LÍQUIDOS ADICIONAIS</span><strong>{pct(lulaShare)}</strong><HundredDots value={lulaShare}/><small>dos ganhos de ambos os finalistas ficaram com Lula</small></div></div>
             <div className="pa-gains-figure"><div className="pa-gains-track"><div className="pa-track-lula" style={{ width:`${lulaShare}%` }}/><div className="pa-track-flavio" style={{ width:`${100-lulaShare}%` }}/></div><div className="pa-gains-legend"><div><span className="pa-key red"/>LULA <b>+{number(delta.lula)}</b><small>{pct(lulaShare)}</small></div><div><span className="pa-key blue"/>FLÁVIO <b>+{number(delta.flavio)}</b><small>{pct(100-lulaShare)}</small></div></div></div>
             <div className="pa-secondary-note">TOTAL DOS GANHOS LÍQUIDOS: <strong>{number(gained)} votos</strong></div>
           </section>
@@ -138,9 +173,9 @@ export default function InvestigationCompact() {
             <div className="pa-open-head"><h2>Três grupos.<br/><em>Uma conta.</em></h2><div><small>VOTOS LÍQUIDOS A REDISTRIBUIR</small><strong>{number(openTotal)}</strong><span>entre os dois finalistas</span></div></div>
             <div className="pa-open-trackbar"><span style={{width:`${one.others/openTotal*100}%`}}/><span style={{width:`${delta.attended/openTotal*100}%`}}/><span style={{width:`${invalidDrop/openTotal*100}%`}}/></div>
             <div className="pa-open-groups">
-              <div><span className="pa-dot violet"/>VOTOS DOS ELIMINADOS <strong>{number(one.others)}</strong><small>{pct(one.others/openTotal*100)} do total</small></div>
-              <div><span className="pa-dot forest"/>MENOS ABSTENÇÃO <strong>+{number(delta.attended)}</strong><small>{pct(delta.attended/openTotal*100)} do total</small></div>
-              <div><span className="pa-dot amber"/>MENOS BRANCOS/NULOS <strong>+{number(invalidDrop)}</strong><small>{pct(invalidDrop/openTotal*100)} do total</small></div>
+              <div className="pa-group-violet"><span className="pa-dot violet"/>VOTOS DOS ELIMINADOS <strong>{number(one.others)}</strong><small>{pct(one.others/openTotal*100)} do total</small><div className="pa-group-column"><i style={{height:`${one.others/openTotal*100}%`}}/></div></div>
+              <div className="pa-group-forest"><span className="pa-dot forest"/>MENOS ABSTENÇÃO <strong>+{number(delta.attended)}</strong><small>{pct(delta.attended/openTotal*100)} do total</small><div className="pa-group-column"><i style={{height:`${delta.attended/openTotal*100}%`}}/></div></div>
+              <div className="pa-group-amber"><span className="pa-dot amber"/>MENOS BRANCOS/NULOS <strong>+{number(invalidDrop)}</strong><small>{pct(invalidDrop/openTotal*100)} do total</small><div className="pa-group-column"><i style={{height:`${invalidDrop/openTotal*100}%`}}/></div></div>
             </div>
             <div className="pa-history"><div className="pa-history-title"><span>COMPARAÇÃO HISTÓRICA</span><b>2022 <ArrowRight size={15}/> 2026</b></div><div className="pa-history-row"><span>Aumento de comparecimento</span><b>+{number(historicalTurnout)}</b><strong>+{number(delta.attended)}</strong><em>5,19×</em></div><div className="pa-history-row"><span>Variação de brancos/nulos</span><b>+{number(historicalInvalidChange)}</b><strong>−{number(invalidDrop)}</strong><em>inverteu</em></div><div className="pa-history-row"><span>Ganho líquido de Lula</span><b>+{number(historicalLulaGain)}</b><strong>+{number(delta.lula)}</strong><em>3,36×</em></div></div>
           </section>
@@ -148,9 +183,9 @@ export default function InvestigationCompact() {
           <section className="pa-scenario pa-slide" id="cenario">
             <div className="pa-scenario-text"><span className="pa-eyebrow">03 / UM ÚNICO CENÁRIO FIXO</span><h2>100%.<br/>100%.<br/><em>60,06%.</em></h2><p>O que acontece se todo o aumento líquido de comparecimento e toda a redução de brancos/nulos forem para Lula?</p><small>Hipótese contábil extrema, com votos dos finalistas do primeiro turno preservados.</small></div>
             <div className="pa-waterfall"><div className="pa-waterfall-head"><span>MONTANDO O GANHO DE LULA</span><strong>+{number(delta.lula)}</strong></div>
-              <div className="pa-waterfall-row"><span><b>100%</b><small>do comparecimento adicional</small></span><strong>+{number(delta.attended)}</strong></div>
-              <div className="pa-waterfall-row"><span><b>100%</b><small>da redução de brancos/nulos</small></span><strong>+{number(invalidDrop)}</strong></div>
-              <div className="pa-waterfall-row"><span><b>{pct(scenarioPercent)}</b><small>dos votos dos eliminados</small></span><strong>+{number(otherNeed)}</strong></div>
+              <div className="pa-waterfall-row"><span><b>100%</b><small>do comparecimento adicional</small></span><strong>+{number(delta.attended)}</strong><i style={{width:`${delta.attended/delta.lula*100}%`}}/></div>
+              <div className="pa-waterfall-row"><span><b>100%</b><small>da redução de brancos/nulos</small></span><strong>+{number(invalidDrop)}</strong><i style={{width:`${invalidDrop/delta.lula*100}%`}}/></div>
+              <div className="pa-waterfall-row"><span><b>{pct(scenarioPercent)}</b><small>dos votos dos eliminados</small></span><strong>+{number(otherNeed)}</strong><i style={{width:`${otherNeed/delta.lula*100}%`}}/></div>
               <div className="pa-waterfall-total"><span>SOMA EXATA</span><b>+{number(delta.lula)}</b></div>
               <p>Os outros <b>{number(otherFlavio)}</b> votos dos eliminados compõem, nessa hipótese, o crescimento líquido de Flávio.</p>
             </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import InvestigationCompact from "@/components/investigation-compact";
 import "./compact.css";
 import "./horizontal.css";
+import "./dark.css";
 
 export const metadata: Metadata = {
   title: "A conta da virada | Pulso — Eleição 2026",
