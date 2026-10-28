@@ -108,7 +108,8 @@
   .pa-story::-webkit-scrollbar{display:none}
   .pa-story-rail{height:100%;transform:none!important;will-change:auto}
   .pa-story .pa-slide{width:100vw;min-width:100vw;height:100%;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;scroll-snap-align:start;scroll-snap-stop:always}
-  .pa-story-progress{display:none}
+  .pa-story-progress{display:flex;position:absolute;bottom:12px;left:50%;padding:9px 15px}
+  .pa-story-progress>span:first-child,.pa-story-dashes{display:none}
   .pa-story .pa-hero{display:grid;grid-template-columns:1fr;gap:28px;padding:42px 24px 38px;align-content:start}
   .pa-story .pa-hero-copy h1{font-size:clamp(61px,12vw,92px)}
   .pa-story .pa-hero-copy>p{font-size:14px}.pa-story .pa-swing{margin-top:17px}.pa-story .pa-swing strong{font-size:48px}.pa-story .pa-jump{margin-top:15px}

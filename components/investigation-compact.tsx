@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Database, MoveRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Database, MoveRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import official from "@/lib/official-comparison.json";
@@ -117,7 +117,7 @@ export default function InvestigationCompact() {
             <div className="pa-hero-copy">
               <span className="pa-eyebrow"><span className="pa-tiny-dot"/>DADOS DO TSE · 1º × 2º TURNO</span>
               <motion.h1 initial={{ opacity:0, y:18 }} animate={{ opacity:1, y:0 }} transition={{ duration:.7 }}>A conta<br/>da <em>virada.</em></motion.h1>
-              <p>Flávio abriu <b>{number(marginOne)}</b> votos de vantagem. Lula terminou com <b>{number(marginTwo)}</b>.</p>
+              <p>Flávio abriu <b>{number(marginOne)}</b> votos de vantagem. Lula terminou com <b>{number(marginTwo)}</b> votos de vantagem.</p>
               <div className="pa-swing"><small>MUDANÇA NA MARGEM</small><strong>{number(marginShift)}</strong><span>votos a favor de Lula entre os turnos</span></div>
               <a className="pa-jump" href="#saldos" onClick={e => jumpTo(e, 1)}>EXPLORE OS NÚMEROS <MoveRight size={18}/></a>
             </div>
