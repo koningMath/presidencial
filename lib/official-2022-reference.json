@@ -1,0 +1,20 @@
+{
+  "source_first": "https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-1o-turno",
+  "source_second": "https://www.tse.jus.br/comunicacao/noticias/2022/Dezembro/tse-proclama-eleitos-presidente-e-vice-presidente-da-republica-luiz-inacio-lula-da-silva-e-geraldo-alckmin",
+  "first": {
+    "attended": 123682372,
+    "blank": 1964779,
+    "null": 3487874,
+    "valid": 118229719,
+    "lula": 57259504,
+    "bolsonaro": 51072345
+  },
+  "second": {
+    "attended": 124252796,
+    "blank": 1769678,
+    "null": 3930765,
+    "valid": 118552353,
+    "lula": 60345999,
+    "bolsonaro": 58206354
+  }
+}
