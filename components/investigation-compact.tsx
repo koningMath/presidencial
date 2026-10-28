@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Database, MoveRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Database, Download, MoveRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import official from "@/lib/official-comparison.json";
@@ -191,10 +191,28 @@ export default function InvestigationCompact() {
             </div>
           </section>
 
-          <section className="pa-close pa-slide" id="videos">
-            <span className="pa-eyebrow">04 / AS DISCUSSÕES EM VÍDEO</span><h2>Questione tudo.<br/><em>Exija o método.</em></h2>
-            <div className="pa-voices"><div><span>MARCELO TRINDADE · ALEGAÇÃO EM VÍDEO</span><blockquote>“Tenho a certeza de que fomos roubados em 2022.”</blockquote><p>O vídeo apresentado pelo usuário atribui a Trindade a tese de um padrão artificial na ordem de totalização. Essa é a conclusão do autor do vídeo.</p></div><div><span>J. ALEX HALDERMAN · PESQUISA NOS EUA</span><blockquote>Uma máquina de votação de teste foi manipulada para produzir um resultado diferente dos votos lançados.</blockquote><p>Halderman demonstrou uma vulnerabilidade em equipamento norte-americano num teste controlado, conforme seu depoimento público. <a href="https://nsarchive.gwu.edu/media/19980/ocr" target="_blank" rel="noreferrer">Ver o depoimento <ArrowUpRight size={13}/></a></p></div></div>
-            <div className="pa-closer">Uma auditoria convincente começa com dados reproduzíveis, premissas visíveis e contas que qualquer pessoa pode conferir.</div>
+          <section className="pa-document pa-slide" id="documento">
+            <div className="pa-document-content">
+              <span className="pa-eyebrow"><span className="pa-tiny-dot"/>04 / DOCUMENTO ENVIADO</span>
+              <div className="pa-document-meta">28 OUT 2026 <span/> TRÊS PÁGINAS</div>
+              <h2>O discurso.<br/><em>Por escrito.</em></h2>
+              <div className="pa-document-quote">
+                <span>EXCERTO DA PÁGINA 03</span>
+                <blockquote>“Saí do Brasil, mas não abandonei os brasileiros.”</blockquote>
+              </div>
+              <p className="pa-document-description">Texto atribuído a Flávio Bolsonaro que contesta o resultado da eleição, descreve sua saída do Brasil e anuncia atuação política a partir dos Estados Unidos.</p>
+              <div className="pa-document-chapters" aria-label="Temas das três páginas"><span><b>01</b> Contestação</span><span><b>02</b> Saída do país</span><span><b>03</b> Apelo final</span></div>
+              <div className="pa-document-actions">
+                <a href="/documentos/pronunciamento-flavio-bolsonaro-2026.pdf" target="_blank" rel="noopener noreferrer" className="pa-document-primary">LER O DOCUMENTO <ArrowUpRight size={17}/></a>
+                <a href="/documentos/pronunciamento-flavio-bolsonaro-2026.pdf" download="pronunciamento-flavio-bolsonaro-2026.pdf" className="pa-document-secondary">BAIXAR PDF <Download size={14}/></a>
+              </div>
+              <small className="pa-document-disclaimer">Reprodução do PDF enviado pelo usuário. A autoria, a procedência e as alegações do texto não foram verificadas de forma independente.</small>
+            </div>
+            <div className="pa-document-visual" aria-label="Prévia da primeira página do documento enviado">
+              <div className="pa-document-preview-head"><span>ARQUIVO / 001</span><span>PDF ORIGINAL</span></div>
+              <div className="pa-document-sheet"><Image src="/documentos/pronunciamento-preview.webp" alt="Visualização da primeira página do PDF, com brasão e texto do pronunciamento" fill sizes="(max-width: 980px) 76vw, 31vw"/></div>
+              <div className="pa-document-preview-foot"><span><b>01</b> / 03</span><span>DOCUMENTO DE 3 PÁGINAS <ArrowUpRight size={13}/></span></div>
+            </div>
           </section>
 
           <footer className="pa-footer pa-slide" id="fontes">
